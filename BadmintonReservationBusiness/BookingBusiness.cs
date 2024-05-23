@@ -126,5 +126,25 @@ namespace BadmintonReservationBusiness
                 return new BusinessResult(500, ex.Message);
             }
         }
+
+        public async Task<IBusinessResult> DeleteBooking(int id)
+        {
+            try
+            {
+                var booking = await _unitOfWork.BookingRepository.GetByIdAsync(id);
+                if (booking == null)
+                {
+                    return new BusinessResult(404, "Booking not found");
+                }
+
+                await _unitOfWork.BookingRepository.RemoveAsync(booking);
+                return new BusinessResult(200, "Booking deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
     }
+
 }

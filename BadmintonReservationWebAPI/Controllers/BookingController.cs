@@ -94,5 +94,13 @@ namespace BadmintonReservationWebAPI.Controllers
                     return StatusCode(500, "An internal server error occurred. Please try again later.");
             }
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            var result = await _business.DeleteBooking(id);
+            return GenerateActionResult(result);
+        }
     }
 }
