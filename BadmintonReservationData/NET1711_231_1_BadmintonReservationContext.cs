@@ -1,0 +1,451 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace BadmintonReservationData
+{
+    public partial class NET1711_231_1_BadmintonReservationContext : DbContext
+    {
+        public NET1711_231_1_BadmintonReservationContext()
+        {
+        }
+
+        public NET1711_231_1_BadmintonReservationContext(DbContextOptions<NET1711_231_1_BadmintonReservationContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Booking> Bookings { get; set; } = null!;
+        public virtual DbSet<BookingDetail> BookingDetails { get; set; } = null!;
+        public virtual DbSet<BookingType> BookingTypes { get; set; } = null!;
+        public virtual DbSet<Company> Companies { get; set; } = null!;
+        public virtual DbSet<Court> Courts { get; set; } = null!;
+        public virtual DbSet<CustomFrame> CustomFrames { get; set; } = null!;
+        public virtual DbSet<Customer> Customers { get; set; } = null!;
+        public virtual DbSet<DateType> DateTypes { get; set; } = null!;
+        public virtual DbSet<Frame> Frames { get; set; } = null!;
+        public virtual DbSet<Holiday> Holidays { get; set; } = null!;
+        public virtual DbSet<Operation> Operations { get; set; } = null!;
+        public virtual DbSet<Payment> Payments { get; set; } = null!;
+        public virtual DbSet<PurchasedHoursMonthly> PurchasedHoursMonthlies { get; set; } = null!;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=1234567890;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Booking>(entity =>
+            {
+                entity.ToTable("booking");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.BookingDateFrom)
+                    .HasColumnType("datetime")
+                    .HasColumnName("booking_date_from");
+
+                entity.Property(e => e.BookingDateTo)
+                    .HasColumnType("datetime")
+                    .HasColumnName("booking_date_to");
+
+                entity.Property(e => e.BookingTypeId).HasColumnName("booking_type_id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+
+                entity.Property(e => e.PaymentId).HasColumnName("payment_id");
+
+                entity.Property(e => e.PaymentType).HasColumnName("payment_type");
+
+                entity.Property(e => e.PromotionAmount).HasColumnName("promotion_amount");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+
+                entity.HasOne(d => d.BookingType)
+                    .WithMany(p => p.Bookings)
+                    .HasForeignKey(d => d.BookingTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("booking_booking_type_FK");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.Bookings)
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("booking_customer_FK");
+
+                entity.HasOne(d => d.Payment)
+                    .WithMany(p => p.Bookings)
+                    .HasForeignKey(d => d.PaymentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("booking_payment_FK");
+            });
+
+            modelBuilder.Entity<BookingDetail>(entity =>
+            {
+                entity.ToTable("booking_detail");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.BookDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("book_date");
+
+                entity.Property(e => e.BookingId).HasColumnName("booking_id");
+
+                entity.Property(e => e.CheckinTime)
+                    .HasColumnType("date")
+                    .HasColumnName("checkin_time");
+
+                entity.Property(e => e.CheckoutTime)
+                    .HasColumnType("date")
+                    .HasColumnName("checkout_time");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.FrameId).HasColumnName("frame_id");
+
+                entity.Property(e => e.Price).HasColumnName("price");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.TimeFrom)
+                    .HasColumnType("datetime")
+                    .HasColumnName("time_from");
+
+                entity.Property(e => e.TimeTo)
+                    .HasColumnType("datetime")
+                    .HasColumnName("time_to");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+
+                entity.HasOne(d => d.Booking)
+                    .WithMany(p => p.BookingDetails)
+                    .HasForeignKey(d => d.BookingId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("booking_detail_booking_FK");
+
+                entity.HasOne(d => d.Frame)
+                    .WithMany(p => p.BookingDetails)
+                    .HasForeignKey(d => d.FrameId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("booking_detail_frame_FK");
+            });
+
+            modelBuilder.Entity<BookingType>(entity =>
+            {
+                entity.ToTable("booking_type");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(200)
+                    .HasColumnName("description");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.PromotionAmount).HasColumnName("promotion_amount");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<Company>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToTable("company");
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(400)
+                    .HasColumnName("description");
+
+                entity.Property(e => e.Location)
+                    .HasMaxLength(400)
+                    .HasColumnName("location");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(200)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.Slogan)
+                    .HasMaxLength(300)
+                    .HasColumnName("slogan");
+            });
+
+            modelBuilder.Entity<Court>(entity =>
+            {
+                entity.ToTable("court");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(100)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<CustomFrame>(entity =>
+            {
+                entity.ToTable("custom_frame");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.FixedDateTypeId).HasColumnName("fixed_date_type_id");
+
+                entity.Property(e => e.FrameId).HasColumnName("frame_id");
+
+                entity.Property(e => e.Price).HasColumnName("price");
+
+                entity.Property(e => e.SpecificDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("specific_date");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+
+                entity.HasOne(d => d.FixedDateType)
+                    .WithMany(p => p.CustomFrames)
+                    .HasForeignKey(d => d.FixedDateTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("custom_frame_date_type_FK");
+
+                entity.HasOne(d => d.Frame)
+                    .WithMany(p => p.CustomFrames)
+                    .HasForeignKey(d => d.FrameId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("custom_frame_frame_FK");
+            });
+
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                entity.ToTable("customer");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.AccountId).HasColumnName("account_id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.FullName)
+                    .HasMaxLength(200)
+                    .HasColumnName("full_name");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("phone_number");
+
+                entity.Property(e => e.TotalHoursMonthly).HasColumnName("total_hours_monthly");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<DateType>(entity =>
+            {
+                entity.ToTable("date_type");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<Frame>(entity =>
+            {
+                entity.ToTable("frame");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CourtId).HasColumnName("court_id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Price).HasColumnName("price");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.TimeFrom)
+                    .HasColumnType("datetime")
+                    .HasColumnName("time_from");
+
+                entity.Property(e => e.TimeTo)
+                    .HasColumnType("datetime")
+                    .HasColumnName("time_to");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+
+                entity.HasOne(d => d.Court)
+                    .WithMany(p => p.Frames)
+                    .HasForeignKey(d => d.CourtId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("frame_court_FK");
+            });
+
+            modelBuilder.Entity<Holiday>(entity =>
+            {
+                entity.ToTable("holiday");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Date)
+                    .HasColumnType("datetime")
+                    .HasColumnName("date");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<Operation>(entity =>
+            {
+                entity.ToTable("operation");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.OpenTimeFrom)
+                    .HasColumnType("datetime")
+                    .HasColumnName("open_time_from");
+
+                entity.Property(e => e.OpenTimeTo)
+                    .HasColumnType("datetime")
+                    .HasColumnName("open_time_to");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.ToTable("payment");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Amount).HasColumnName("amount");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.ThirdPartyPaymentId).HasColumnName("third_party_payment_id");
+
+                entity.Property(e => e.ThirdPartyResponse).HasColumnName("third_party_response");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+            });
+
+            modelBuilder.Entity<PurchasedHoursMonthly>(entity =>
+            {
+                entity.ToTable("purchased_hours_monthly");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.AmountHour).HasColumnName("amount_hour");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+
+                entity.Property(e => e.PaymentId).HasColumnName("payment_id");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_date");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.PurchasedHoursMonthlies)
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("purchased_hours_monthly_customer_FK");
+
+                entity.HasOne(d => d.Payment)
+                    .WithMany(p => p.PurchasedHoursMonthlies)
+                    .HasForeignKey(d => d.PaymentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("purchased_hours_monthly_payment_FK");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
+}
