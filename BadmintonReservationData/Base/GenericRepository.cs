@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace BadmintonReservationData.Base
 {
-    public class BaseDAO<T> where T : class
+    public class GenericRepository<T> where T : class
     {
         protected readonly NET1711_231_1_BadmintonReservationContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public BaseDAO()
+        public GenericRepository()
         {
             _context = new NET1711_231_1_BadmintonReservationContext();
             _dbSet = _context.Set<T>();

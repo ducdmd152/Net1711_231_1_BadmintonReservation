@@ -6,18 +6,19 @@ namespace BadmintonReservationBusiness
 {
     public class BookingBusiness
     {
-        private readonly BookingDAO dao;
+       // private readonly BookingDAO this._unitOfWork.BookingRepository;
+        private readonly UnitOfWork _unitOfWork;
 
         public BookingBusiness()
         {
-            this.dao = new BookingDAO();
+            _unitOfWork ??= new UnitOfWork();
         }
 
         public async Task<IBusinessResult> GetAll()
         {
             try
             {
-                var result = await this.dao.GetAllWithDetailsAsync();
+                var result = await this._unitOfWork.BookingRepository.GetAllWithDetailsAsync();
 
                 if (result == null)
                 {
@@ -38,7 +39,7 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var result = await dao.GetByIdWithDetailsAsync(id);
+                var result = await this._unitOfWork.BookingRepository.GetByIdWithDetailsAsync(id);
 
                 if (result == null)
                 {
@@ -88,7 +89,7 @@ namespace BadmintonReservationBusiness
                     }
                 };
 
-                await dao.CreateAsync(booking);
+                await this._unitOfWork.BookingRepository.CreateAsync(booking);
                 return new BusinessResult(201, "Booking created successfully", booking);
             }
             catch (Exception ex)
@@ -101,7 +102,7 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var booking = await dao.GetByIdAsync(id);
+                var booking = await this._unitOfWork.BookingRepository.GetByIdAsync(id);
                 if (booking == null)
                 {
                     return new BusinessResult(404, "Booking not found");
@@ -116,7 +117,7 @@ namespace BadmintonReservationBusiness
                     booking.Payment.UpdatedDate = DateTime.Now;
                 }
 
-                await dao.UpdateAsync(booking);
+                await this._unitOfWork.BookingRepository.UpdateAsync(booking);
 
                 return new BusinessResult(200, "Booking updated successfully", booking);
             }

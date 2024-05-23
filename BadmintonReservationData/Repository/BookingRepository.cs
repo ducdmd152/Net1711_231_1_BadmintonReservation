@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadmintonReservationData.DAO
+namespace BadmintonReservationData.Repository
 {
-    public class BookingDAO : GenericRepository<Booking>
+    public class BookingRepository : GenericRepository<Booking>
     {
-        public BookingDAO() { }
+        public BookingRepository() { }
 
         public async Task<List<Booking>> GetAllWithDetailsAsync()
         {

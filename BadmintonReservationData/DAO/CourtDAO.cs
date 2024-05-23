@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BadmintonReservationData.DAO
 {
-    public class CourtDAO : BaseDAO<Court>
+    public class CourtDAO : GenericRepository<Court>
     {
         public CourtDAO() { }
     }
