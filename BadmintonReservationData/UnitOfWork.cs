@@ -11,6 +11,7 @@ namespace BadmintonReservationData
     {
         private NET1711_231_1_BadmintonReservationContext _context;
         private BookingRepository _bookingRepository;
+        private BookingDetailRepository _bookingDetailRepository;
 
         public UnitOfWork()
         {
@@ -22,6 +23,14 @@ namespace BadmintonReservationData
             get
             {
                 return _bookingRepository ??= new BookingRepository();
+            }
+        }
+
+        public BookingDetailRepository BookingDetailRepository
+        {
+            get
+            {
+                return _bookingDetailRepository ??= new BookingDetailRepository();
             }
         }
     }

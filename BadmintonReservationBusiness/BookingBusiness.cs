@@ -1,6 +1,7 @@
 ﻿using BadmintonReservationData;
 using BadmintonReservationData.DAO;
 using BadmintonReservationData.DTOs;
+using System.Linq.Expressions;
 
 namespace BadmintonReservationBusiness
 {
@@ -14,7 +15,7 @@ namespace BadmintonReservationBusiness
             _unitOfWork ??= new UnitOfWork();
         }
 
-        public async Task<IBusinessResult> GetAll()
+        public async Task<IBusinessResult> GetAllAsync()
         {
             try
             {
@@ -35,7 +36,7 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> GetById(int id)
+        public async Task<IBusinessResult> GetByIdAsync(int id)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> CreateBooking(CreateBookingRequestDTO bookingRequest)
+        public async Task<IBusinessResult> CreateBookingAsync(CreateBookingRequestDTO bookingRequest)
         {
             try
             {
@@ -98,18 +99,47 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> UpdateBooking(int id, UpdateBookingRequestDTO updateRequest)
+        public async Task<IBusinessResult> UpdateBookingAsync(int id, UpdateBookingRequestDTO updateRequest)
         {
             try
             {
-                var booking = await this._unitOfWork.BookingRepository.GetByIdAsync(id);
+                var booking = await this._unitOfWork.BookingRepository.GetByIdWithDetailsAsync(id);
                 if (booking == null)
                 {
                     return new BusinessResult(404, "Booking not found");
                 }
 
-                booking.Status = updateRequest.Status;
-                booking.UpdatedDate = DateTime.Now;
+                if (updateRequest.Status.HasValue)
+                {
+                    booking.Status = updateRequest.Status.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                    switch (updateRequest.Status.Value)
+                    {
+                        case 1:
+                            // pending -> skip
+                            break;
+                        case 2:
+                            // successful -> skip
+                            break;
+                        case 3:
+                            // failed -> update all details' status to failed
+                            foreach(var details in booking.BookingDetails)
+                            {
+                                details.Status = 3;
+                            }
+                            break;
+                        case 4:
+                            // cancelled -> update all details' status to cancelled
+                            foreach (var details in booking.BookingDetails)
+                            {
+                                details.Status = 4;
+                            }
+                            break;
+                        default:
+                            // default code block
+                            break;
+                    }                    
+                }
 
                 if (updateRequest.PaymentStatus.HasValue)
                 {
@@ -127,15 +157,21 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> DeleteBooking(int id)
+        public async Task<IBusinessResult> DeleteBookingAsync(int id)
         {
             try
             {
-                var booking = await _unitOfWork.BookingRepository.GetByIdAsync(id);
+                var booking = await _unitOfWork.BookingRepository.GetByIdWithDetailsAsync(id);
                 if (booking == null)
                 {
                     return new BusinessResult(404, "Booking not found");
                 }
+
+                //foreach (var details in booking.BookingDetails)
+                //{
+                //    await _unitOfWork.BookingDetailsRepository.RemoveAsync(details);
+                //}
+                //await _unitOfWork.PaymentRepository.RemoveAsync(booking);
 
                 await _unitOfWork.BookingRepository.RemoveAsync(booking);
                 return new BusinessResult(200, "Booking deleted successfully");
