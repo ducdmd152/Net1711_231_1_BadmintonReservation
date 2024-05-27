@@ -115,5 +115,35 @@ namespace BadmintonReservationData.Base
         {
             return await _dbSet.FindAsync(code);
         }
+
+        #region Separating asign entity and save operators
+
+        public void PrepareCreate(T entity)
+        {
+            _dbSet.Add(entity);
+        }
+
+        public void PrepareUpdate(T entity)
+        {
+            var tracker = _dbSet.Attach(entity);
+            tracker.State = EntityState.Modified;
+        }
+
+        public void PrepareRemove(T entity)
+        {
+            _dbSet.Remove(entity);
+        }
+
+        public int Save()
+        {
+            return this._unitOfWork.Context.SaveChanges();
+        }
+
+        public async Task<int> SaveAsync()
+        {
+            return await this._unitOfWork.Context.SaveChangesAsync();
+        }
+
+        #endregion Separating asign entity and save operators
     }
 }
