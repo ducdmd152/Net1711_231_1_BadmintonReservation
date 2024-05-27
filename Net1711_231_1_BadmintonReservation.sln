@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationData", "BadmintonReservationData\BadmintonReservationData.csproj", "{2E2F8DB4-E881-413B-BC3E-DE49ECA5D53D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationData", "BadmintonReservationData\BadmintonReservationData.csproj", "{2E2F8DB4-E881-413B-BC3E-DE49ECA5D53D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationBusiness", "BadmintonReservationBusiness\BadmintonReservationBusiness.csproj", "{E71F48BD-154A-4A14-BB9B-1F9B511092E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationBusiness", "BadmintonReservationBusiness\BadmintonReservationBusiness.csproj", "{E71F48BD-154A-4A14-BB9B-1F9B511092E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationWebAPI", "BadmintonReservationWebAPI\BadmintonReservationWebAPI.csproj", "{30378FD5-A31F-4A81-B9BB-F97567326716}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationWebAPI", "BadmintonReservationWebAPI\BadmintonReservationWebAPI.csproj", "{30378FD5-A31F-4A81-B9BB-F97567326716}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationWebApp", "BadmintonReservationWebApp\BadmintonReservationWebApp.csproj", "{66CE8A1E-2295-4E20-AF6D-2AE9A997D53E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationWebApp", "BadmintonReservationWebApp\BadmintonReservationWebApp.csproj", "{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{30378FD5-A31F-4A81-B9BB-F97567326716}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30378FD5-A31F-4A81-B9BB-F97567326716}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30378FD5-A31F-4A81-B9BB-F97567326716}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66CE8A1E-2295-4E20-AF6D-2AE9A997D53E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66CE8A1E-2295-4E20-AF6D-2AE9A997D53E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66CE8A1E-2295-4E20-AF6D-2AE9A997D53E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66CE8A1E-2295-4E20-AF6D-2AE9A997D53E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
