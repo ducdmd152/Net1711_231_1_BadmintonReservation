@@ -35,8 +35,30 @@ namespace BadmintonReservationData
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=1234567890;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
             }
+        }
+
+        public async Task<int> SaveChangeAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in this.ChangeTracker.Entries().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified))
+            {
+                var now = DateTime.Now;
+                entry.Property("UpdatedDate").CurrentValue = now;
+                if (entry.State == EntityState.Modified)
+                {
+                    entry.Property("CreatedDate").IsModified = false;
+                }
+
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Property("CreatedDate").CurrentValue = now;
+                }
+            }
+
+            var numberChange = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            this.ChangeTracker.Clear();
+            return numberChange;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

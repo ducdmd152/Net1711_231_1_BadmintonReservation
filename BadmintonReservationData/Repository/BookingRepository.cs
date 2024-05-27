@@ -10,7 +10,9 @@ namespace BadmintonReservationData.Repository
 {
     public class BookingRepository : GenericRepository<Booking>
     {
-        public BookingRepository() { }
+        public BookingRepository(UnitOfWork unitOfWork) : base(unitOfWork)
+        {
+        }
 
         public async Task<List<Booking>> GetAllWithDetailsAsync()
         {

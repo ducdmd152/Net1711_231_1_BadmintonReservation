@@ -1,5 +1,4 @@
 ﻿using BadmintonReservationData;
-using BadmintonReservationData.DAO;
 using BadmintonReservationData.DTOs;
 
 namespace BadmintonReservationBusiness
@@ -9,9 +8,9 @@ namespace BadmintonReservationBusiness
        // private readonly BookingDAO this._unitOfWork.BookingRepository;
         private readonly UnitOfWork _unitOfWork;
 
-        public BookingBusiness()
+        public BookingBusiness(UnitOfWork unitOfWork)
         {
-            _unitOfWork ??= new UnitOfWork();
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IBusinessResult> GetAll()
@@ -58,6 +57,7 @@ namespace BadmintonReservationBusiness
 
         public async Task<IBusinessResult> CreateBooking(CreateBookingRequestDTO bookingRequest)
         {
+            await this._unitOfWork.BeginTransactionAsync();
             try
             {
                 var booking = new Booking
@@ -90,16 +90,19 @@ namespace BadmintonReservationBusiness
                 };
 
                 await this._unitOfWork.BookingRepository.CreateAsync(booking);
+                await this._unitOfWork.CommitTransactionAsync();
                 return new BusinessResult(201, "Booking created successfully", booking);
             }
             catch (Exception ex)
             {
+                this._unitOfWork.RollbackTransaction();
                 return new BusinessResult(500, ex.Message);
             }
         }
 
         public async Task<IBusinessResult> UpdateBooking(int id, UpdateBookingRequestDTO updateRequest)
         {
+            await this._unitOfWork.BeginTransactionAsync();
             try
             {
                 var booking = await this._unitOfWork.BookingRepository.GetByIdAsync(id);
@@ -117,18 +120,22 @@ namespace BadmintonReservationBusiness
                     booking.Payment.UpdatedDate = DateTime.Now;
                 }
 
-                await this._unitOfWork.BookingRepository.UpdateAsync(booking);
+                this._unitOfWork.BookingRepository.Update(booking);
+                await this._unitOfWork.CommitTransactionAsync();
 
                 return new BusinessResult(200, "Booking updated successfully", booking);
             }
             catch (Exception ex)
             {
+                this._unitOfWork.RollbackTransaction();
+                
                 return new BusinessResult(500, ex.Message);
             }
         }
 
         public async Task<IBusinessResult> DeleteBooking(int id)
         {
+            await this._unitOfWork.BeginTransactionAsync();
             try
             {
                 var booking = await _unitOfWork.BookingRepository.GetByIdAsync(id);
@@ -137,11 +144,13 @@ namespace BadmintonReservationBusiness
                     return new BusinessResult(404, "Booking not found");
                 }
 
-                await _unitOfWork.BookingRepository.RemoveAsync(booking);
+                _unitOfWork.BookingRepository.Remove(booking);
+                await _unitOfWork.CommitTransactionAsync();
                 return new BusinessResult(200, "Booking deleted successfully");
             }
             catch (Exception ex)
             {
+                this._unitOfWork.RollbackTransaction();
                 return new BusinessResult(500, ex.Message);
             }
         }

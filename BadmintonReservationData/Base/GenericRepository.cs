@@ -9,13 +9,14 @@ namespace BadmintonReservationData.Base
 {
     public class GenericRepository<T> where T : class
     {
-        protected readonly NET1711_231_1_BadmintonReservationContext _context;
-        protected readonly DbSet<T> _dbSet;
+        private const string ErrorMessage = "Haven't any transaction";
+        internal readonly DbSet<T> _dbSet;
+        private readonly UnitOfWork _unitOfWork;
 
-        public GenericRepository()
+        public GenericRepository(UnitOfWork unitOfWork)
         {
-            _context = new NET1711_231_1_BadmintonReservationContext();
-            _dbSet = _context.Set<T>();
+            _dbSet = unitOfWork.Context.Set<T>();
+            this._unitOfWork = unitOfWork;
         }
 
         public List<T> GetAll()
@@ -29,41 +30,70 @@ namespace BadmintonReservationData.Base
         public void Create(T entity)
         {
             _dbSet.Add(entity);
-            _context.SaveChanges();
+            this._unitOfWork.Context.SaveChanges();
         }
 
-        public async Task<int> CreateAsync(T entity)
+        public async Task CreateAsync(T entity)
         {
-            _dbSet.Add(entity);
-            return await _context.SaveChangesAsync();
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            await this._dbSet.AddAsync(entity).ConfigureAwait(false);
         }
 
-        public void Update(T entity)
+        public async Task CreateRangeAsync(IEnumerable<T> entities)
         {
-            var tracker = _context.Attach(entity);
-            tracker.State = EntityState.Modified;
-            _context.SaveChanges();
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            await this._dbSet.AddRangeAsync(entities).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync(T entity)
+        public T Update(T entity)
         {
-            var tracker = _context.Attach(entity);
-            tracker.State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            this._dbSet.Attach(entity);
+            return entity;
+        }
+
+        public IEnumerable<T> UpdateRange(IEnumerable<T> entities)
+        {
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            this._dbSet.AttachRange(entities);
+            return entities;
         }
 
         public bool Remove(T entity)
         {
-            _dbSet.Remove(entity);
-            _context.SaveChanges();
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            this._dbSet.Remove(entity);
             return true;
         }
 
-        public async Task<bool> RemoveAsync(T entity)
+        public void RemoveRange(IEnumerable<T> entities)
         {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-            return true;
+            if (!this._unitOfWork.IsTransaction)
+            {
+                throw new InvalidOperationException(ErrorMessage);
+            }
+
+            this._dbSet.RemoveRange(entities);
         }
 
         public T GetById(int id)

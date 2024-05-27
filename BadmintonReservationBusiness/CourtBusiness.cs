@@ -1,4 +1,6 @@
-﻿using BadmintonReservationData.DAO;
+﻿using BadmintonReservationData;
+using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +11,18 @@ namespace BadmintonReservationBusiness
 {
     public class CourtBusiness
     {
-        private readonly CourtDAO dao;
+        private readonly UnitOfWork unitOfWork;
 
-        public CourtBusiness()
+        public CourtBusiness(UnitOfWork unitOfWork)
         {
-            this.dao = new CourtDAO();
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<IBusinessResult> GetAll()
         {
             try
             {
-                var courts = await dao.GetAllAsync();
+                var courts = await this.unitOfWork.CourtRepository.GetAllAsync();
 
                 if (courts == null)
                 {
@@ -40,7 +42,7 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var court = dao.GetById(id);
+                var court = this.unitOfWork.CourtRepository.GetById(id);
 
                 if (court == null)
                 {
@@ -53,6 +55,78 @@ namespace BadmintonReservationBusiness
             }
             catch (Exception ex)
             {
+                return new BusinessResult(-4, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> CreateCourt(CourtRequestDTO courtRequest)
+        { 
+            await this.unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var court = new Court
+                {
+                    Name = courtRequest.Name,
+                    Status = courtRequest.Status,
+                };
+
+                await this.unitOfWork.CourtRepository.CreateAsync(court);
+                await this.unitOfWork.CommitTransactionAsync();
+                return new BusinessResult(200, "Create Success");     
+            }
+            catch (Exception ex)
+            {
+                this.unitOfWork.RollbackTransaction();
+                return new BusinessResult(-4, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> UpdateCourt(CourtRequestDTO courtRequest)
+        {
+            await this.unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var court = this.unitOfWork.CourtRepository.GetById(courtRequest.Id);
+
+                if (court == null)
+                {
+                    return new BusinessResult(-1, "No court data");
+                }
+
+                court.Name = courtRequest.Name;
+                court.Status = courtRequest.Status;
+                this.unitOfWork.CourtRepository.Update(court);
+                await this.unitOfWork.CommitTransactionAsync();
+
+                return new BusinessResult(200, "Update court success");
+            }
+            catch (Exception ex)
+            {
+                this.unitOfWork.RollbackTransaction();
+                return new BusinessResult(-4, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> RemoveCourt(int id)
+        {
+            await this.unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var court = this.unitOfWork.CourtRepository.GetById(id);
+
+                if (court == null)
+                {
+                    return new BusinessResult(-1, "No court data");
+                }
+
+                this.unitOfWork.CourtRepository.Remove(court);
+                await this.unitOfWork.CommitTransactionAsync();
+
+                return new BusinessResult(200, "Delete Success");
+            }
+            catch (Exception ex)
+            {
+                this.unitOfWork.RollbackTransaction();
                 return new BusinessResult(-4, ex.Message);
             }
         }
