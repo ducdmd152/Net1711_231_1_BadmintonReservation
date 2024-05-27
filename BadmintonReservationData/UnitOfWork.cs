@@ -19,6 +19,7 @@ namespace BadmintonReservationData
 
         private BookingRepository _bookingRepository;
         private CourtRepository _courtRepository;
+        private BookingDetailRepository _bookingDetailRepository;
 
         public UnitOfWork()
         {
@@ -102,5 +103,14 @@ namespace BadmintonReservationData
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public BookingDetailRepository BookingDetailRepository
+        {
+            get
+            {
+                return _bookingDetailRepository ??= new BookingDetailRepository(this);
+            }
+        }
+
     }
 }

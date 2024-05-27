@@ -16,21 +16,22 @@ namespace BadmintonReservationData.Repository
 
         public async Task<List<Booking>> GetAllWithDetailsAsync()
         {
-            return await this._dbSet.IgnoreAutoIncludes()
-                              //.Include(item => item.Customer)                            
-                              //.Include(item => item.BookingDetails)
-                              //.Include(item => item.BookingType)
-                              //.Include(item => item.Payment)
+            return await this._dbSet
+                              .IgnoreAutoIncludes()
+                              .Include(item => item.Customer)
+                              .Include(item => item.BookingDetails)
+                              .Include(item => item.BookingType)
+                              .Include(item => item.Payment)                              
                               .ToListAsync();
         }
 
         public async Task<Booking> GetByIdWithDetailsAsync(int id)
         {
             return await this._dbSet.IgnoreAutoIncludes()
-                              //.Include(item => item.Customer)
-                              //.Include(item => item.BookingDetails)
-                              //.Include(item => item.BookingType)
-                              //.Include(item => item.Payment)
+                              .Include(item => item.Customer)
+                              .Include(item => item.BookingDetails)
+                              .Include(item => item.BookingType)
+                              .Include(item => item.Payment)
                               .SingleOrDefaultAsync(item => item.Id == id);
         }
     }
