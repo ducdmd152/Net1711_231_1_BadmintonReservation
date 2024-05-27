@@ -10,6 +10,10 @@ namespace BadmintonReservationWebAPI.Controllers
     {
         private readonly BookingBusiness _business;
 
+        public BookingController(BookingBusiness business)
+        {
+            _business = business;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
