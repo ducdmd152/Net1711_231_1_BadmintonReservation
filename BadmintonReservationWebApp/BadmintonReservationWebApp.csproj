@@ -17,11 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-    <ProjectReference Include="..\BadmintonReservationData\BadmintonReservationData.csproj" />
-=======
     <ProjectReference Include="..\BadmintonReservationBusiness\BadmintonReservationBusiness.csproj" />
->>>>>>> e24d591614e0f02b13f52dbc988925e158982677
   </ItemGroup>
 
 </Project>
