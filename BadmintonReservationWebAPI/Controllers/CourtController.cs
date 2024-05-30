@@ -29,12 +29,12 @@ namespace BadmintonReservationWebAPI.Controllers
                     return NotFound(result);
                     break;
                 case 200:
-                    return Ok(result);
+                    return Ok(result.Data);
                     break;
                 default:
                     return StatusCode(500, "An internal server error occurred. Please try again later.");
                     break;
-            }                
+            }
         }
 
         [HttpGet]
@@ -80,7 +80,7 @@ namespace BadmintonReservationWebAPI.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCourt(CourtRequestDTO courtRequest)
         {
             var result = await _business.UpdateCourt(courtRequest);
@@ -101,7 +101,7 @@ namespace BadmintonReservationWebAPI.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("id")]
         public async Task<IActionResult> UpdateCourt(int id)
         {
             var result = await _business.RemoveCourt(id);

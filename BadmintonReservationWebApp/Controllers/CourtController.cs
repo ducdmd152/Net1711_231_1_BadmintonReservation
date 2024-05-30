@@ -12,7 +12,7 @@ namespace BadmintonReservationWebApp.Controllers
         public async Task<IActionResult> Index()
         {
             
-            return View(this);
+            return View();
         }
 
         [HttpGet]
@@ -23,7 +23,7 @@ namespace BadmintonReservationWebApp.Controllers
                 var result = new List<Court>();
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync(URL + "api"))
+                    using (var response = await httpClient.GetAsync(URL + "api/Court/GetAll"))
                     {
                         if (response.IsSuccessStatusCode)
                         {

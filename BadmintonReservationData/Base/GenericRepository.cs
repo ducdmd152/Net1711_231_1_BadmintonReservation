@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BadmintonReservationData.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BadmintonReservationData.Base
 {
-    public class GenericRepository<T> where T : class
+    public class GenericRepository<T> where T : BaseEntity
     {
         private const string ErrorMessage = "Haven't any transaction";
         internal readonly DbSet<T> _dbSet;

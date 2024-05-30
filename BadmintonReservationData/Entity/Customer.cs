@@ -1,9 +1,10 @@
-﻿using System;
+﻿using BadmintonReservationData.Entity;
+using System;
 using System.Collections.Generic;
 
 namespace BadmintonReservationData
 {
-    public partial class Customer
+    public partial class Customer : BaseEntity
     {
         public Customer()
         {
@@ -15,8 +16,6 @@ namespace BadmintonReservationData
         public string PhoneNumber { get; set; } = null!;
         public string FullName { get; set; } = null!;
         public double TotalHoursMonthly { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
         public int? AccountId { get; set; }
 
         public virtual ICollection<Booking> Bookings { get; set; }

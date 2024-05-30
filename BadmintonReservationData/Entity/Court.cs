@@ -1,9 +1,10 @@
-﻿using System;
+﻿using BadmintonReservationData.Entity;
+using System;
 using System.Collections.Generic;
 
 namespace BadmintonReservationData
 {
-    public partial class Court
+    public partial class Court : BaseEntity
     {
         public Court()
         {
@@ -13,8 +14,6 @@ namespace BadmintonReservationData
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public int Status { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
 
         public virtual ICollection<Frame> Frames { get; set; }
     }

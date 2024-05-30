@@ -1,9 +1,10 @@
-﻿using System;
+﻿using BadmintonReservationData.Entity;
+using System;
 using System.Collections.Generic;
 
 namespace BadmintonReservationData
 {
-    public partial class Booking
+    public partial class Booking : BaseEntity
     {
         public Booking()
         {
@@ -19,8 +20,6 @@ namespace BadmintonReservationData
         public double PromotionAmount { get; set; }
         public int PaymentType { get; set; }
         public int PaymentId { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
 
         public virtual BookingType BookingType { get; set; } = null!;
         public virtual Customer Customer { get; set; } = null!;
