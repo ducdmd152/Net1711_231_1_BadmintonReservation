@@ -118,7 +118,7 @@
                         2: 'Online',
                     }
                     var html = '';
-                    console.log(result["$values"]);
+                    // console.log(result["$values"]);
                     $.each(result["$values"], function (key, item) {
                         console.log(item);
                         html += '<tr>';
@@ -129,7 +129,7 @@
                         html += '<td>' + generateBookingDetailsHTML(item.bookingDetails["$values"]) + '</td>';
                         html += '<td>' + item.promotionAmount + '</td>';
                         html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
-                        html += '<td>' + item.updatedDate + '</td>';
+                        html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
                         html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="deleteItem(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
                     });
