@@ -174,6 +174,7 @@ namespace BadmintonReservationBusiness
                     return new BusinessResult(404, "Booking not found");
                 }
 
+                _unitOfWork.BookingDetailRepository.RemoveRange(booking.BookingDetails);
                 _unitOfWork.BookingRepository.Remove(booking);
                 await _unitOfWork.CommitTransactionAsync();
                 return new BusinessResult(200, "Booking deleted successfully");
