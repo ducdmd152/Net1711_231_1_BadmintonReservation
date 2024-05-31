@@ -7,191 +7,131 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BadmintonReservationData;
 using BadmintonReservationBusiness;
+using Newtonsoft.Json;
+using System.Security.Policy;
+using System.Text;
+using BadmintonReservationData.DTOs;
 
 namespace BadmintonReservationWebApp.Controllers
 {
     public class BookingsController : Controller
     {
-        private readonly string API_BASE_URL = "https://localhost:7257/api/Booking/";
+        private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/Booking/";
         private readonly NET1711_231_1_BadmintonReservationContext _unitOfWork = new NET1711_231_1_BadmintonReservationContext();
         public BookingsController()
         {
         }
 
-        // GET: Bookings
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<List<Booking>> GetAll()
         {
-            //var bizResult = await _bookingBusiness.GetAllAsync();
-            //switch (bizResult.Status)
-            //{
-            //    case 400:
-            //        return BadRequest();
-            //        break;
-            //    case 404:
-            //        return NotFound();
-            //        break;
-            //    case 200:
-            //        return View(bizResult.Data);
-            //        break;
-            //    case 201:
-            //        return View(bizResult.Data);
-            //    default:
-            //        return StatusCode(500, "An internal server error occurred. Please try again later.");
-            //        break;
-            //}
-
-            return NotFound();
-        }
-
-        // GET: Bookings/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _unitOfWork.Bookings == null)
+            try
             {
-                return NotFound();
-            }
-
-            var booking = await _unitOfWork.Bookings
-                .Include(b => b.BookingType)
-                .Include(b => b.Customer)
-                .Include(b => b.Payment)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
-
-            return View(booking);
-        }
-
-        // GET: Bookings/Create
-        public IActionResult Create()
-        {
-            ViewData["BookingTypeId"] = new SelectList(_unitOfWork.BookingTypes, "Id", "Name");
-            ViewData["CustomerId"] = new SelectList(_unitOfWork.Customers, "Id", "FullName");
-            ViewData["PaymentId"] = new SelectList(_unitOfWork.Payments, "Id", "Id");
-            return View();
-        }
-
-        // POST: Bookings/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CustomerId,BookingTypeId,BookingDateFrom,BookingDateTo,Status,PromotionAmount,PaymentType,PaymentId,CreatedDate,UpdatedDate")] Booking booking)
-        {
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Add(booking);
-                await _unitOfWork.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BookingTypeId"] = new SelectList(_unitOfWork.BookingTypes, "Id", "Name", booking.BookingTypeId);
-            ViewData["CustomerId"] = new SelectList(_unitOfWork.Customers, "Id", "FullName", booking.CustomerId);
-            ViewData["PaymentId"] = new SelectList(_unitOfWork.Payments, "Id", "Id", booking.PaymentId);
-            return View(booking);
-        }
-
-        // GET: Bookings/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _unitOfWork.Bookings == null)
-            {
-                return NotFound();
-            }
-
-            var booking = await _unitOfWork.Bookings.FindAsync(id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
-            ViewData["BookingTypeId"] = new SelectList(_unitOfWork.BookingTypes, "Id", "Name", booking.BookingTypeId);
-            ViewData["CustomerId"] = new SelectList(_unitOfWork.Customers, "Id", "FullName", booking.CustomerId);
-            ViewData["PaymentId"] = new SelectList(_unitOfWork.Payments, "Id", "Id", booking.PaymentId);
-            return View(booking);
-        }
-
-        // POST: Bookings/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerId,BookingTypeId,BookingDateFrom,BookingDateTo,Status,PromotionAmount,PaymentType,PaymentId,CreatedDate,UpdatedDate")] Booking booking)
-        {
-            if (id != booking.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var result = new List<Booking>();
+                using (var httpClient = new HttpClient())
                 {
-                    _unitOfWork.Update(booking);
-                    await _unitOfWork.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookingExists(booking.Id))
+                    using (var response = await httpClient.GetAsync(API_URL_ENDPOINT))
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<List<Booking>>(content);
+                        }
                     }
                 }
-                return RedirectToAction(nameof(Index));
+
+                return result;
             }
-            ViewData["BookingTypeId"] = new SelectList(_unitOfWork.BookingTypes, "Id", "Name", booking.BookingTypeId);
-            ViewData["CustomerId"] = new SelectList(_unitOfWork.Customers, "Id", "FullName", booking.CustomerId);
-            ViewData["PaymentId"] = new SelectList(_unitOfWork.Payments, "Id", "Id", booking.PaymentId);
-            return View(booking);
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        // GET: Bookings/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpGet("{id}")]
+        public async Task<Booking> Details(int id)
         {
-            if (id == null || _unitOfWork.Bookings == null)
+            try
             {
-                return NotFound();
-            }
+                Booking result = null;
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync(API_URL_ENDPOINT))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<Booking>(content);
+                        }
+                    }
+                }
 
-            var booking = await _unitOfWork.Bookings
-                .Include(b => b.BookingType)
-                .Include(b => b.Customer)
-                .Include(b => b.Payment)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (booking == null)
+                return result;
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                throw new Exception(ex.Message);
             }
-
-            return View(booking);
         }
 
-        // POST: Bookings/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpPost("{id}")]
+        public async Task<Booking> Create(int id, [FromBody] Booking booking)
         {
-            if (_unitOfWork.Bookings == null)
+            try
             {
-                return Problem("Entity set 'NET1711_231_1_BadmintonReservationContext.Bookings'  is null.");
+                using (var httpClient = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(booking);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    using (var response = await httpClient.PostAsync($"{API_URL_ENDPOINT}", content))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var createdBooking = JsonConvert.DeserializeObject<Booking>(responseContent);
+                            return createdBooking;
+                        }
+                        else
+                        {
+                            throw new Exception($"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}");
+                        }
+                    }
+                }
             }
-            var booking = await _unitOfWork.Bookings.FindAsync(id);
-            if (booking != null)
+            catch (Exception ex)
             {
-                _unitOfWork.Bookings.Remove(booking);
+                throw new Exception($"Internal server error: {ex.Message}");
             }
-            
-            await _unitOfWork.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
-        private bool BookingExists(int id)
+        [HttpPut("{id}")]
+        public async Task<Booking> Update(int id, [FromBody] UpdateBookingRequestDTO updateBookingRequest)
         {
-          return (_unitOfWork.Bookings?.Any(e => e.Id == id)).GetValueOrDefault();
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(updateBookingRequest);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    using (var response = await httpClient.PutAsync($"{API_URL_ENDPOINT}{id}", content))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var updatedBooking = JsonConvert.DeserializeObject<Booking>(responseContent);
+                            return updatedBooking;
+                        }
+                        else
+                        {
+                            throw new Exception($"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Internal server error: {ex.Message}");
+            }
         }
     }
 }

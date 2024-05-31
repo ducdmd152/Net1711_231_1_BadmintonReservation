@@ -6,7 +6,6 @@ namespace BadmintonReservationBusiness
 {
     public class BookingBusiness
     {
-       // private readonly BookingDAO this._unitOfWork.BookingRepository;
         private readonly UnitOfWork _unitOfWork;
 
         public BookingBusiness(UnitOfWork unitOfWork)
