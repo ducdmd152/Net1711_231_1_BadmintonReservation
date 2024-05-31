@@ -14,12 +14,17 @@ using BadmintonReservationData.DTOs;
 
 namespace BadmintonReservationWebApp.Controllers
 {
-    public class BookingsController : Controller
+    public class BookingController : Controller
     {
         private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/Booking/";
-        private readonly NET1711_231_1_BadmintonReservationContext _unitOfWork = new NET1711_231_1_BadmintonReservationContext();
-        public BookingsController()
+        
+        public BookingController()
         {
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            return View();
         }
 
         [HttpGet]

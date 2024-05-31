@@ -1,0 +1,242 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h2 class="display-8">Booking List</h2>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">Code</th>
+                    <th class="card-title text-center">Customer</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">Type</th>                            
+                    <th class="card-title text-center">Details</th>
+                    <th class="card-title text-center">Promotion Amount</th>
+                    <th class="card-title text-center">Payment Type</th>
+                    <th class="card-title text-center">Last Updated Date</th>
+                    <th class="card-title text-center"></th>
+                </tr>
+            </thead>
+            <tbody class="tblList">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="topUpModal" tabindex="-1" aria-labelledby="topUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="topUpModalLabel">Topup Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="topUpModalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+
+            $("#btSave").click(function () {
+                var formData = new FormData();
+                formData.append("ID", $("#ID").val());
+                formData.append("TypeCode", $("#TypeCode").val());
+                formData.append("AmountGross", $("#AmountGross").val());
+                formData.append("CurrencyCode", $("#CurrencyCode").val());
+                formData.append("Description", $("#Description").val());
+                formData.append("IsIncluded", $("#IsIncluded").val());
+
+                console.log(formData);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Save", "Home")',
+                    //contentType: 'application/json;charset=utf-8',
+                    //dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (result) {
+                        //console.log(result);
+
+                        if (result.status >= 1) {
+                            $('#topUpModal').modal('hide');
+                            loadData();
+                        }
+                        alert(result.message);
+                    },
+                    error: function (xhr, error) {
+                        //alert(xhr.responseText);
+                        console.log(xhr);
+                    }
+                });
+            });
+
+            ////////
+        });
+
+        function loadData() {
+            $.ajax({
+                url: '@Url.Action("GetAll", "Booking")',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    const statusMap = {
+                        1: 'Pending',
+                        2: 'Successful',
+                        3: 'Failed',
+                        4: 'Cancelled'
+                    };
+                    const paymentTypeMap = {
+                        1: 'Offline',
+                        2: 'Online',
+                    }
+                    var html = '';
+                    console.log(result["$values"]);
+                    $.each(result["$values"], function (key, item) {
+                        console.log(item);
+                        html += '<tr>';
+                        html += '<td>' + item.id + '</td>';
+                        html += '<td>' + item.customer.fullName + '</td>';
+                        html += '<td>' + statusMap[item.status] + '</td>';
+                        html += '<td>' + item.bookingType.name + '</td>';                        
+                        html += '<td>' + generateBookingDetailsHTML(item.bookingDetails["$values"]) + '</td>';
+                        html += '<td>' + item.promotionAmount + '</td>';
+                        html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
+                        html += '<td>' + item.updatedDate + '</td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="deleteItem(\'' + item.id + '\')">Delete</a></td>';
+                        html += '</tr>';
+                    });
+                    $('.tblList').html(html);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+       
+
+        function add() {
+            $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html("Add New");
+
+            $.ajax({
+                url: '@Url.Action("Add", "Court")',
+                type: "GET",
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+                },
+                error: function (message) {
+                    alert(message);
+                }
+            });
+        }
+
+        function edit(id) {
+            $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html("Update");
+
+            var formData = new FormData();
+            formData.append("id", id);
+
+            $.ajax({
+                url: '@Url.Action("Edit", "Home")',
+                type: "POST",
+                //contentType: 'application/json;charset=utf-8',
+                //dataType: "json",
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+                },
+                error: function (message) {
+                    alert(message);
+                }
+            });
+        }
+
+        function delele(id) {
+            var result = confirm("Are you sure to delete?");
+            if (result) {
+                //alert(id);
+                var formData = new FormData();
+                formData.append("id", id);
+
+                $.ajax({
+                    url: '@Url.Action("Delete", "Home")',
+                    type: "POST",
+                    //contentType: 'application/json;charset=utf-8',
+                    //dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (result) {
+                        if (result.status >= 1) {
+                            $('#topUpModal').modal('hide');
+                            loadData();
+                        }
+                        alert(result.message);
+                    },
+                    error: function (message) {
+                        alert(message);
+                    }
+                });
+            }
+        }
+
+        function generateBookingDetailsHTML(bookingDetails) {
+            var html = '';
+
+            bookingDetails.forEach(function (bookingDetail) {
+                var bookDate = new Date(bookingDetail.bookDate).toLocaleDateString();
+                var timeFrom = new Date(bookingDetail.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                var timeTo = new Date(bookingDetail.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                var courtName = bookingDetail.frame.court.name;
+
+                var rowHtml = '<p>';
+                rowHtml += bookDate + ' | ' + timeFrom + ' - ' + timeTo + ' | ' + courtName;
+                rowHtml += '</p>';
+                html += rowHtml;
+            });
+
+            return html;
+        }
+
+        function formatDateTime(dateTimeString, format) {
+            var dateTime = new Date(dateTimeString);
+            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+
+            return formattedDateTime;
+        }
+
+    </script>
+}

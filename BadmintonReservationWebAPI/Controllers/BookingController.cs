@@ -19,23 +19,7 @@ namespace BadmintonReservationWebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _business.GetAllAsync();
-            switch (result.Status)
-            {
-                case 400:
-                    return BadRequest(result);
-                    break;
-                case 404:
-                    return NotFound(result);
-                    break;
-                case 200:
-                    return Ok(result);
-                    break;
-                case 201:
-                    return StatusCode(201, result);
-                default:
-                    return StatusCode(500, "An internal server error occurred. Please try again later.");
-                    break;
-            }
+            return GenerateActionResult(result);
         }
 
         [HttpGet]
@@ -43,23 +27,7 @@ namespace BadmintonReservationWebAPI.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _business.GetByIdAsync(id);
-            switch (result.Status)
-            {
-                case 400:
-                    return BadRequest(result);
-                    break;
-                case 404:
-                    return NotFound(result);
-                    break;
-                case 200:
-                    return Ok(result);
-                    break;
-                case 201:
-                    return StatusCode(201, result);
-                default:
-                    return StatusCode(500, "An internal server error occurred. Please try again later.");
-                    break;
-            }
+            return GenerateActionResult(result);
         }
 
         [HttpPost]
@@ -78,6 +46,14 @@ namespace BadmintonReservationWebAPI.Controllers
             return GenerateActionResult(result);
         }
 
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            var result = await _business.DeleteBookingAsync(id);
+            return GenerateActionResult(result);
+        }
+
         private IActionResult GenerateActionResult(IBusinessResult result)
         {
             switch (result.Status)
@@ -87,20 +63,12 @@ namespace BadmintonReservationWebAPI.Controllers
                 case 404:
                     return NotFound(result);
                 case 200:
-                    return Ok(result);
+                    return Ok(result.Data);
                 case 201:
-                    return StatusCode(201, result);
+                    return StatusCode(201, result.Data);
                 default:
                     return StatusCode(500, "An internal server error occurred. Please try again later.");
             }
-        }
-
-        [HttpDelete]
-        [Route("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
-        {
-            var result = await _business.DeleteBookingAsync(id);
-            return GenerateActionResult(result);
         }
     }
 }
