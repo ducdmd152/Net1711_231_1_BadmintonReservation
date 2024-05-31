@@ -131,7 +131,7 @@
             $("#topUpModalLabel").html("Add New");
 
             $.ajax({
-                url: '@Url.Action("Add", "Home")',
+                url: '@Url.Action("Add", "Court")',
                 type: "GET",
                 success: function (result) {
                     $("#topUpModalContent").html(result);

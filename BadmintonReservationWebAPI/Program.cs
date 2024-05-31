@@ -16,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<BookingBusiness>();
 builder.Services.AddScoped<CourtBusiness>();
+builder.Services.AddScoped<CustomFrameBusiness>();
 
 var app = builder.Build();
 
