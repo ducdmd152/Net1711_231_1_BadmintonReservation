@@ -144,6 +144,42 @@ namespace BadmintonReservationBusiness
                     }                    
                 }
 
+                if (updateRequest.CustomerId.HasValue)
+                {
+                    booking.CustomerId = updateRequest.CustomerId.Value;
+                    booking.UpdatedDate = DateTime.Now;                    
+                }
+
+                if (updateRequest.BookingTypeId.HasValue)
+                {
+                    booking.BookingTypeId = updateRequest.BookingTypeId.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                }
+
+                if (updateRequest.BookingDateFrom.HasValue)
+                {
+                    booking.BookingDateFrom = updateRequest.BookingDateFrom.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                }
+
+                if (updateRequest.BookingDateTo.HasValue)
+                {
+                    booking.BookingDateTo = updateRequest.BookingDateTo.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                }
+
+                if (updateRequest.PromotionAmount.HasValue)
+                {
+                    booking.PromotionAmount = updateRequest.PromotionAmount.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                }
+
+                if (updateRequest.PaymentType.HasValue)
+                {
+                    booking.PaymentType = updateRequest.PaymentType.Value;
+                    booking.UpdatedDate = DateTime.Now;
+                }
+
                 if (updateRequest.PaymentStatus.HasValue)
                 {
                     booking.Payment.Status = updateRequest.PaymentStatus.Value;

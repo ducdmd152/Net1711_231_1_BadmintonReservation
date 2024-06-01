@@ -85,7 +85,7 @@ namespace BadmintonReservationWebApp.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
         public async Task<Booking> Details(int id)
         {
             try
@@ -141,7 +141,7 @@ namespace BadmintonReservationWebApp.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch]
         public async Task<Booking> Update(int id, [FromBody] UpdateBookingRequestDTO updateBookingRequest)
         {
             try
@@ -150,7 +150,7 @@ namespace BadmintonReservationWebApp.Controllers
                 {
                     var json = JsonConvert.SerializeObject(updateBookingRequest);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    using (var response = await httpClient.PutAsync($"{API_URL_ENDPOINT}{id}", content))
+                    using (var response = await httpClient.PatchAsync($"{API_URL_ENDPOINT}{id}", content))
                     {
                         if (response.IsSuccessStatusCode)
                         {

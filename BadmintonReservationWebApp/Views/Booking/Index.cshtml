@@ -116,7 +116,9 @@
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
 
-                    $("#btSave").click(create);
+                    $("#btSave").off("click").on("click", function () {
+                        create();
+                    });
                 },
                 error: function (message) {
                     alert(message);
@@ -127,18 +129,14 @@
         function edit(id) {
             $("#topUpModalContent").html("");
             $("#topUpModalLabel").html(`Edit booking [${id}]`);
-
-            var formData = new FormData();
-            formData.append("id", id);
             $.ajax({
                 url: '@Url.Action("Edit", "Booking")' + '/' + id,
                 type: "GET",
-                data: formData;
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
 
-                    $("#btSave").click(function () {
+                    $("#btSave").off("click").on("click", function () {
                         update(id);
                     });
                 },
@@ -248,6 +246,7 @@
             var data = {                
                 bookingTypeId: $("#BookingTypeId").val(),
                 status: $("#Status").val(),
+                paymentStatus: null,
                 promotionAmount: $("#PromotionAmount").val(),
                 paymentType: $("#PaymentType").val(),
                 customerId: $("#CustomerId").val(),
@@ -258,7 +257,7 @@
             console.log(data);
 
             $.ajax({
-                type: 'POST',
+                type: 'PATCH',
                 url: '@Url.Action("Update", "Booking")' + '/' + id,
                 contentType: 'application/json;charset=utf-8',
                 dataType: "json",
