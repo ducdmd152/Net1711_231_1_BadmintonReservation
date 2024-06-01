@@ -62,7 +62,7 @@ namespace BadmintonReservationBusiness
                         this._unitOfWork.BookingRepository.Update(booking);
                         await _unitOfWork.CommitTransactionAsync();
                     }
-                    bookingDetail.Booking = booking;
+                    //bookingDetail.Booking = booking;
                 }
 
                 return new BusinessResult(200, "Booking detail updated successfully", bookingDetail);

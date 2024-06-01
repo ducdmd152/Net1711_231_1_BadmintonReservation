@@ -28,6 +28,12 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
+        public IActionResult Add()
+        {
+            return PartialView("add", new Booking());
+        }
+
+        [HttpGet]
         public async Task<List<Booking>> GetAll()
         {
             try

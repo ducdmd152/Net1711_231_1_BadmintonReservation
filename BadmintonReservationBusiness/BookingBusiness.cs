@@ -149,6 +149,7 @@ namespace BadmintonReservationBusiness
                     booking.Payment.UpdatedDate = DateTime.Now;
                 }
 
+                booking.UpdatedDate = DateTime.Now;
                 this._unitOfWork.BookingRepository.Update(booking);
                 await this._unitOfWork.CommitTransactionAsync();
 
