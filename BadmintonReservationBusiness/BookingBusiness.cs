@@ -69,7 +69,7 @@ namespace BadmintonReservationBusiness
                     PromotionAmount = bookingRequest.PromotionAmount,
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
-                    Status = 0, // Initial status
+                    Status = bookingRequest.Status, // Initial status
                     BookingDetails = bookingRequest.BookingDetails.Select(d => new BookingDetail
                     {
                         BookDate = d.BookDate,

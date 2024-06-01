@@ -37,7 +37,7 @@ namespace BadmintonReservationData.Repository
                               .Include(item => item.BookingDetails)
                               .ThenInclude(bookingDetail => bookingDetail.Frame)
                               .ThenInclude(frame => frame.Court)
-                              .SingleOrDefaultAsync();
+                              .FirstOrDefaultAsync(item => item.Id == id);
         }
     }
 }

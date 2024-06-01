@@ -3,6 +3,7 @@
     public class CreateBookingRequestDTO
     {
         public int CustomerId { get; set; }
+        public int Status { get; set; }
         public int BookingTypeId { get; set; }
         public DateTime? BookingDateFrom { get; set; }
         public DateTime? BookingDateTo { get; set; }
