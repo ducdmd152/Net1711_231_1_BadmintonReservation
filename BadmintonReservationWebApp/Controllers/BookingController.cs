@@ -85,7 +85,7 @@ namespace BadmintonReservationWebApp.Controllers
             }
         }
 
-        [HttpPost("{id}")]
+        [HttpPost]
         public async Task<Booking> Create(int id, [FromBody] Booking booking)
         {
             try

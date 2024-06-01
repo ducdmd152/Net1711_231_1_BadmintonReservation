@@ -63,35 +63,32 @@
             loadData();
 
             $("#btSave").click(function () {
-                var formData = new FormData();
-                formData.append("ID", $("#ID").val());
-                formData.append("TypeCode", $("#TypeCode").val());
-                formData.append("AmountGross", $("#AmountGross").val());
-                formData.append("CurrencyCode", $("#CurrencyCode").val());
-                formData.append("Description", $("#Description").val());
-                formData.append("IsIncluded", $("#IsIncluded").val());
+                var data = {
+                    bookingTypeId: $("#BookingTypeId").val(),
+                    status: $("#Status").val(),
+                    promotionAmount: $("#PromotionAmount").val(),
+                    paymentType: $("#PaymentType").val(),
+                    customerId: $("#CustomerId").val(),
+                    bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
+                    bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
+                };
 
-                console.log(formData);
+                console.log(data);
 
                 $.ajax({
                     type: 'POST',
-                    url: '@Url.Action("Save", "Home")',
-                    //contentType: 'application/json;charset=utf-8',
-                    //dataType: "json",
-                    processData: false,
-                    contentType: false,
-                    data: formData,
+                    url: '@Url.Action("Create", "Booking")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    data: JSON.stringify(data),
                     success: function (result) {
-                        //console.log(result);
-
                         if (result.status >= 1) {
                             $('#topUpModal').modal('hide');
                             loadData();
                         }
-                        alert(result.message);
+                        alert("Created new booking sucessfully!");
                     },
                     error: function (xhr, error) {
-                        //alert(xhr.responseText);
                         console.log(xhr);
                     }
                 });
@@ -236,6 +233,24 @@
             var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
 
             return formattedDateTime;
+        }
+
+        function convertToISODateTime(dateTimeString) {
+            // Create a new Date object from the date-time string
+            const date = new Date(dateTimeString);
+
+            // Get the components of the date and time
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+
+            // Construct the ISO 8601 date-time string
+            const isoDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+            return isoDateTime;
         }
 
     </script>
