@@ -93,13 +93,14 @@
                         html += '<td>' + item.promotionAmount + '</td>';
                         html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="delete(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
                 },
                 error: function (xhr, error) {
                     alert(xhr.statusText);
+                    alert(`Something went wrong!`);
                 }
             });
         }
@@ -146,13 +147,13 @@
             });
         }
 
-        function delele(id) {
+        function deleteItem(id) {
             var result = confirm(`Are you sure to delete booking [${id}]?`);
             if (result) {
 
                 $.ajax({
+                    url: '@Url.Action("Delete", "Booking")' + '/' + id,
                     type: 'DELETE',
-                    url: '@Url.Action("Delete", "Booking")',
                     contentType: 'application/json;charset=utf-8',
                     dataType: "json",
                     success: function (result) {
@@ -161,6 +162,7 @@
                     },
                     error: function (xhr, error) {
                         console.log(xhr);
+                        alert(`Something went wrong!`);
                     }
                 });
             }
@@ -238,6 +240,7 @@
                 },
                 error: function (xhr, error) {
                     console.log(xhr);
+                    alert(`Something went wrong!`);
                 }
             });
         }
@@ -271,6 +274,7 @@
                 },
                 error: function (xhr, error) {
                     console.log(xhr);
+                    alert(`Something went wrong!`);
                 }
             });
         }

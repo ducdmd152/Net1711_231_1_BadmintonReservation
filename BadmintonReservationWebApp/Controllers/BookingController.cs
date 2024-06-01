@@ -170,5 +170,30 @@ namespace BadmintonReservationWebApp.Controllers
                 throw new Exception($"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    HttpResponseMessage response = await httpClient.DeleteAsync($"{API_URL_ENDPOINT}{id}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return NoContent();
+                    }
+                    else
+                    {
+                        return StatusCode((int)response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 }

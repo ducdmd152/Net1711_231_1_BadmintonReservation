@@ -108,7 +108,7 @@
                 dataType: "json",
                 success: function (result) {
                     var html = '';
-                    $.each(result, function (key, item) {
+                    $.each(result["$values"], function (key, item) {
                         //console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
