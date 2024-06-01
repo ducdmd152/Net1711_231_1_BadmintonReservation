@@ -67,6 +67,7 @@ namespace BadmintonReservationBusiness
                     BookingDateFrom = bookingRequest.BookingDateFrom,
                     BookingDateTo = bookingRequest.BookingDateTo,
                     PromotionAmount = bookingRequest.PromotionAmount,
+                    PaymentType = bookingRequest.PaymentType,
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
                     Status = bookingRequest.Status, // Initial status

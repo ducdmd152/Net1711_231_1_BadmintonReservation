@@ -60,41 +60,7 @@
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            loadData();
-
-            $("#btSave").click(function () {
-                var data = {
-                    bookingTypeId: $("#BookingTypeId").val(),
-                    status: $("#Status").val(),
-                    promotionAmount: $("#PromotionAmount").val(),
-                    paymentType: $("#PaymentType").val(),
-                    customerId: $("#CustomerId").val(),
-                    bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
-                    bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
-                };
-
-                console.log(data);
-
-                $.ajax({
-                    type: 'POST',
-                    url: '@Url.Action("Create", "Booking")',
-                    contentType: 'application/json;charset=utf-8',
-                    dataType: "json",
-                    data: JSON.stringify(data),
-                    success: function (result) {
-                        if (result.status >= 1) {
-                            $('#topUpModal').modal('hide');
-                            loadData();
-                        }
-                        alert("Created new booking sucessfully!");
-                    },
-                    error: function (xhr, error) {
-                        console.log(xhr);
-                    }
-                });
-            });
-
-            ////////
+            loadData();          
         });
 
         function loadData() {
@@ -127,7 +93,7 @@
                         html += '<td>' + item.promotionAmount + '</td>';
                         html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="deleteItem(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="delete(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
@@ -144,11 +110,13 @@
             $("#topUpModalLabel").html("Add New");
 
             $.ajax({
-                url: '@Url.Action("add", "Booking")',
+                url: '@Url.Action("Add", "Booking")',
                 type: "GET",
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
+
+                    $("#btSave").click(create);
                 },
                 error: function (message) {
                     alert(message);
@@ -158,22 +126,21 @@
 
         function edit(id) {
             $("#topUpModalContent").html("");
-            $("#topUpModalLabel").html("Update");
+            $("#topUpModalLabel").html(`Edit booking [${id}]`);
 
             var formData = new FormData();
             formData.append("id", id);
-
             $.ajax({
-                url: '@Url.Action("Edit", "Home")',
-                type: "POST",
-                //contentType: 'application/json;charset=utf-8',
-                //dataType: "json",
-                processData: false,
-                contentType: false,
-                data: formData,
+                url: '@Url.Action("Edit", "Booking")' + '/' + id,
+                type: "GET",
+                data: formData;
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
+
+                    $("#btSave").click(function () {
+                        update(id);
+                    });
                 },
                 error: function (message) {
                     alert(message);
@@ -182,29 +149,20 @@
         }
 
         function delele(id) {
-            var result = confirm("Are you sure to delete?");
+            var result = confirm(`Are you sure to delete booking [${id}]?`);
             if (result) {
-                //alert(id);
-                var formData = new FormData();
-                formData.append("id", id);
 
                 $.ajax({
-                    url: '@Url.Action("Delete", "Home")',
-                    type: "POST",
-                    //contentType: 'application/json;charset=utf-8',
-                    //dataType: "json",
-                    processData: false,
-                    contentType: false,
-                    data: formData,
+                    type: 'DELETE',
+                    url: '@Url.Action("Delete", "Booking")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
                     success: function (result) {
-                        if (result.status >= 1) {
-                            $('#topUpModal').modal('hide');
-                            loadData();
-                        }
-                        alert(result.message);
+                        loadData();
+                        alert(`Deleted booking [${id}] sucessfully!`);
                     },
-                    error: function (message) {
-                        alert(message);
+                    error: function (xhr, error) {
+                        console.log(xhr);
                     }
                 });
             }
@@ -252,6 +210,72 @@
 
             return isoDateTime;
         }
+
+
+        function create() {
+            var data = {
+                bookingTypeId: $("#BookingTypeId").val(),
+                status: $("#Status").val(),
+                promotionAmount: $("#PromotionAmount").val(),
+                paymentType: $("#PaymentType").val(),
+                customerId: $("#CustomerId").val(),
+                bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
+                bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
+            };
+
+            console.log(data);
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Create", "Booking")',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $('#topUpModal').modal('hide');
+                        loadData();
+                    }
+                    alert("Created new booking sucessfully!");
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                }
+            });
+        }
+
+        function update(id) {
+            var data = {                
+                bookingTypeId: $("#BookingTypeId").val(),
+                status: $("#Status").val(),
+                promotionAmount: $("#PromotionAmount").val(),
+                paymentType: $("#PaymentType").val(),
+                customerId: $("#CustomerId").val(),
+                bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
+                bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
+            };
+
+            console.log(data);
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Update", "Booking")' + '/' + id,
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $('#topUpModal').modal('hide');
+                        loadData();
+                    }
+                    alert(`Updated booking id:${id} sucessfully!`);
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                }
+            });
+        }
+    
 
     </script>
 }

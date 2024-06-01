@@ -17,7 +17,7 @@ namespace BadmintonReservationWebApp.Controllers
     public class BookingController : Controller
     {
         private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/Booking/";
-        
+
         public BookingController()
         {
         }
@@ -31,6 +31,32 @@ namespace BadmintonReservationWebApp.Controllers
         public IActionResult Add()
         {
             return PartialView("add", new Booking());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                Booking result = null;
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}{id}"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<Booking>(content);
+                        }
+                    }
+                }
+
+                return PartialView("edit", result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }            
         }
 
         [HttpGet]
@@ -67,7 +93,7 @@ namespace BadmintonReservationWebApp.Controllers
                 Booking result = null;
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync(API_URL_ENDPOINT))
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}{id}"))
                     {
                         if (response.IsSuccessStatusCode)
                         {

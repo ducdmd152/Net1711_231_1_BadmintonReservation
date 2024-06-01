@@ -2,27 +2,38 @@
 
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Customer</label>
-        @Html.EditorFor(model => model.BookingTypeId, new { htmlAttributes = new { @class = "form-control" } })
+        <label for="1">Booking Type</label>
+        @Html.DropDownListFor(model => model.BookingTypeId, new SelectList(new[] {
+        new { Value = 1, Text = "Normaly" },
+        new { Value = 2, Text = "Monthly" },
+        new { Value = 3, Text = "By buyed hours" }
+        }, "Value", "Text"), new { @class = "form-control" })
     </div>
     <div class="col-md-6">
+        <label for="1">Status</label>
+        @Html.DropDownListFor(model => model.Status, new SelectList(new[] {
+        new { Value = 1, Text = "Pending" },
+        new { Value = 2, Text = "Sucessful" },
+        new { Value = 3, Text = "Fail" },
+        new { Value = 4, Text = "Cancelled" }
+        }, "Value", "Text"), new { @class = "form-control" })
     </div>
 </div>
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Name</label>
-        @Html.EditorFor(model => model.Status, new { htmlAttributes = new { @class = "form-control" } })
+        <label for="1">Promotion Amount</label>
+        @Html.EditorFor(model => model.PromotionAmount, new {
+                htmlAttributes = new { @class = "form-control", @min = "0", @step = "1000" }
+            })
     </div>
     <div class="col-md-6">
-        <label for="1">Name</label>
-        @Html.EditorFor(model => model.PromotionAmount, new { htmlAttributes = new { @class = "form-control" } })
-    </div
-    <div class="col-md-6">
-        <label for="1">Name</label>
-        @Html.EditorFor(model => model.PaymentId, new { htmlAttributes = new { @class = "form-control" } })
-    </div>
-
-    @Html.Hidden("CustomerId", 1)
-    <div class="col-md-6">
+        <label for="1">Payment Type</label>
+        @Html.DropDownListFor(model => model.PaymentType, new SelectList(new[] {
+        new { Value = 1, Text = "Offline" },
+        new { Value = 2, Text = "Online" },
+        }, "Value", "Text"), new { @class = "form-control" })
+        @Html.Hidden("CustomerId", 1)
+        @Html.Hidden("BookingDateFrom", DateTime.Now)
+        @Html.Hidden("BookingDateTo", DateTime.Now)
     </div>
 </div>
