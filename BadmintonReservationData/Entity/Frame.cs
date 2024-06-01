@@ -8,7 +8,6 @@ namespace BadmintonReservationData
     {
         public Frame()
         {
-            BookingDetails = new HashSet<BookingDetail>();
             CustomFrames = new HashSet<CustomFrame>();
         }
 
@@ -20,7 +19,6 @@ namespace BadmintonReservationData
         public int CourtId { get; set; }
 
         public virtual Court Court { get; set; } = null!;
-        public virtual ICollection<BookingDetail> BookingDetails { get; set; }
         public virtual ICollection<CustomFrame> CustomFrames { get; set; }
     }
 }

@@ -8,14 +8,11 @@ namespace BadmintonReservationData
     {
         public BookingType()
         {
-            Bookings = new HashSet<Booking>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public double PromotionAmount { get; set; }
-
-        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

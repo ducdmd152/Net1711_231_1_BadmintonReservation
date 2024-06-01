@@ -8,7 +8,6 @@ namespace BadmintonReservationData
     {
         public Customer()
         {
-            Bookings = new HashSet<Booking>();
             PurchasedHoursMonthlies = new HashSet<PurchasedHoursMonthly>();
         }
 
@@ -17,8 +16,6 @@ namespace BadmintonReservationData
         public string FullName { get; set; } = null!;
         public double TotalHoursMonthly { get; set; }
         public int? AccountId { get; set; }
-
-        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public virtual ICollection<PurchasedHoursMonthly> PurchasedHoursMonthlies { get; set; }
     }
 }

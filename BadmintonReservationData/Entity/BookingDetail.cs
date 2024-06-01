@@ -16,8 +16,6 @@ namespace BadmintonReservationData
         public int Status { get; set; }
         public DateTime? CheckinTime { get; set; }
         public DateTime? CheckoutTime { get; set; }
-
-        public virtual Booking Booking { get; set; } = null!;
         public virtual Frame Frame { get; set; } = null!;
     }
 }

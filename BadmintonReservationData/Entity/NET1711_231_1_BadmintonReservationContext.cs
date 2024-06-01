@@ -98,19 +98,19 @@ namespace BadmintonReservationData
                     .HasColumnName("updated_date");
 
                 entity.HasOne(d => d.BookingType)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.BookingTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_booking_type_FK");
 
                 entity.HasOne(d => d.Customer)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_customer_FK");
 
                 entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.PaymentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_payment_FK");
@@ -158,14 +158,14 @@ namespace BadmintonReservationData
                     .HasColumnType("datetime")
                     .HasColumnName("updated_date");
 
-                entity.HasOne(d => d.Booking)
-                    .WithMany(p => p.BookingDetails)
-                    .HasForeignKey(d => d.BookingId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("booking_detail_booking_FK");
+                //entity.HasOne(d => d.Booking)
+                //    .WithMany(p => p.BookingDetails)
+                //    .HasForeignKey(d => d.BookingId)
+                //    .OnDelete(DeleteBehavior.ClientSetNull)
+                //    .HasConstraintName("booking_detail_booking_FK");
 
                 entity.HasOne(d => d.Frame)
-                    .WithMany(p => p.BookingDetails)
+                    .WithMany()
                     .HasForeignKey(d => d.FrameId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_detail_frame_FK");
@@ -357,7 +357,7 @@ namespace BadmintonReservationData
                     .HasColumnName("updated_date");
 
                 entity.HasOne(d => d.Court)
-                    .WithMany(p => p.Frames)
+                    .WithMany()
                     .HasForeignKey(d => d.CourtId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("frame_court_FK");

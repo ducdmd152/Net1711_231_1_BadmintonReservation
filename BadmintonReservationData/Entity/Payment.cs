@@ -8,7 +8,6 @@ namespace BadmintonReservationData
     {
         public Payment()
         {
-            Bookings = new HashSet<Booking>();
             PurchasedHoursMonthlies = new HashSet<PurchasedHoursMonthly>();
         }
 
@@ -18,7 +17,6 @@ namespace BadmintonReservationData
         public int? ThirdPartyPaymentId { get; set; }
         public int? ThirdPartyResponse { get; set; }
 
-        public virtual ICollection<Booking> Bookings { get; set; }
         public virtual ICollection<PurchasedHoursMonthly> PurchasedHoursMonthlies { get; set; }
     }
 }
