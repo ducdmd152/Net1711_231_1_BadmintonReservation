@@ -80,6 +80,11 @@
                         1: 'Offline',
                         2: 'Online',
                     }
+                    const bookingTypeMap = {
+                        1: 'Normaly',
+                        2: 'Monthly',
+                        5: 'By buyed hours'
+                    }
                     var html = '';
                     // console.log(result);
                     $.each(result, function (key, item) {
@@ -88,7 +93,7 @@
                         html += '<td>' + item.id + '</td>';
                         html += '<td>' + item.customer.fullName + '</td>';
                         html += '<td>' + statusMap[item.status] + '</td>';
-                        html += '<td>' + item.bookingType.name + '</td>';                        
+                        html += '<td>' + bookingTypeMap[item.bookingTypeId] + '</td>';
                         html += '<td>' + generateBookingDetailsHTML(item.bookingDetails) + '</td>';
                         html += '<td>' + item.promotionAmount + '</td>';
                         html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
