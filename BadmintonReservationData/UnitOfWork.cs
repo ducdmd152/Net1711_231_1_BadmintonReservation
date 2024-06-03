@@ -20,7 +20,7 @@ namespace BadmintonReservationData
         private BookingRepository _bookingRepository;
         private CourtRepository _courtRepository;
         private BookingDetailRepository _bookingDetailRepository;
-        private CustomerFrameRepository _customFramRepository;
+        private CustomFrameRepository _customFramRepository;
 
         public UnitOfWork()
         {
@@ -54,11 +54,11 @@ namespace BadmintonReservationData
             }
         }
 
-        public CustomerFrameRepository CustomerFrameRepository
+        public CustomFrameRepository CustomFrameRepository
         {
             get
             {
-                return _customFramRepository ??= new CustomerFrameRepository(this);
+                return _customFramRepository ??= new CustomFrameRepository(this);
             }
         }
 
