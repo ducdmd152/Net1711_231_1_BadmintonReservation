@@ -22,6 +22,7 @@ namespace BadmintonReservationData
         private BookingDetailRepository _bookingDetailRepository;
         private CustomFrameRepository _customFramRepository;
         private FrameRepository _frameRepository;
+        private DateTypeRepository _dateTypeRespository;
 
         public UnitOfWork()
         {
@@ -68,6 +69,14 @@ namespace BadmintonReservationData
             get
             {
                 return _frameRepository ??= new FrameRepository(this);
+            }
+        }
+
+        public DateTypeRepository DateTypeRepository
+        {
+            get
+            {
+                return _dateTypeRespository ??=new DateTypeRepository(this);
             }
         }
 

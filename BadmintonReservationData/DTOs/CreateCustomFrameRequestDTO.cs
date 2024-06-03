@@ -11,6 +11,7 @@ namespace BadmintonReservationData.DTOs
         public int FrameId { get; set; }
 
         [Required(ErrorMessage = "Price is required")]
+        [Range(0.1, double.MaxValue, ErrorMessage = "Price must be > 0")]
         public double Price { get; set; }
 
         [Required(ErrorMessage = "Specific Date is required")]

@@ -1,15 +1,10 @@
-@model BadmintonReservationData.DTOs.CreateFrameRequestDTO
+@model BadmintonReservationData.DTOs.CreateCustomFrameRequestDTO
 
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Time From</label>
-        @Html.EditorFor(model => model.TimeFrom, new { htmlAttributes = new { @class = "form-control", @type = "time" } })
-        @Html.ValidationMessageFor(model => model.TimeFrom, "", new { @class = "text-danger" })
-    </div>
-    <div class="col-md-6">
-        <label for="1">Time To</label>
-        @Html.EditorFor(model => model.TimeTo, new { htmlAttributes = new { @class = "form-control", @type = "time" } })
-        @Html.ValidationMessageFor(model => model.TimeTo, "", new { @class = "text-danger" })
+        <label for="1">Specific Date</label>
+        @Html.EditorFor(model => model.SpecificDate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+        @Html.ValidationMessageFor(model => model.SpecificDate, "", new { @class = "text-danger" })
     </div>
 </div>
 <div class="form-group row">
@@ -30,18 +25,27 @@
 </div>
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Court</label>
+        <label for="1">Frame</label>
         <select id="CourtId" class="form-control"></select>
-        @Html.ValidationMessageFor(model => model.CourtId, "", new { @class = "text-danger" })
+        @Html.ValidationMessageFor(model => model.FrameId, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="1">Date In Week</label>
+        <select id="DateInWeek" class="form-control"></select>
+        @Html.ValidationMessageFor(model => model.FrameId, "", new { @class = "text-danger" })
     </div>
 </div>
 <script>
     $(document).ready(function() {
-        getAllCourt();
+        getAllFrame();
+        getAllData();
     });
-    function getAllCourt() {
+    function getAllFrame() {
         $.ajax({
-            url: '@Url.Action("GetAll", "CustomFrame")',
+            url: '@Url.Action("GetAll", "Frame")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
@@ -49,10 +53,16 @@
                     // Clear previous options
                     $('#CourtId').empty();
                     // Add each court as an option to the dropdown list
+
                     $.each(result, function(key, item) {
+
+                        var text = extractHourAndMinute(item.timeFrom) + "-" + extractHourAndMinute(item.timeTo) + "-" 
+                        + item.court.name;
+                       
+
                         $('#CourtId').append($('<option>', {
                             value: item.id,
-                            text: item.name
+                            text: text,
                         }));
                     });
                 },
@@ -63,6 +73,36 @@
         });
     }
 
+    function getAllData() {
+        $.ajax({
+            url: '@Url.Action("GetAll", "DateType")',
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                // Clear previous options
+                $('#DateInWeek').empty();
+                // Add each court as an option to the dropdown list
+                $.each(result, function (key, item) {
+                    $('#DateInWeek').append($('<option>', {
+                        value: item.id,
+                        text: item.name
+                    }));
+                });
+            },
+            error: function (xhr, error) {
+                alert(xhr.statusText);
+                alert(`Something went wrong!`);
+            }
+        });
+    }
+
+    function extractHourAndMinute(datetimeStr) {
+        let date = new Date(datetimeStr);
+        let hours = date.getHours().toString().padStart(2, '0');
+        let minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
 
 
 </script>

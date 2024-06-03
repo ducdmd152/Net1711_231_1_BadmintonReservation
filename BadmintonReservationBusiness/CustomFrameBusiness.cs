@@ -18,7 +18,7 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var customFrames = await this._unitOfWork.CustomFrameRepository.GetAllAsync();          
+                var customFrames = this._unitOfWork.CustomFrameRepository.GetAllWithFrame();          
 
                 if (customFrames == null)
                 {
@@ -33,6 +33,11 @@ namespace BadmintonReservationBusiness
                         Price = x.Price,
                         Status = x.Status,
                         FrameId = x.FrameId,
+                        TimeFrom = x.Frame.TimeFrom,
+                        TimeTo = x.Frame.TimeTo,
+                        CourtName = x.Frame.Court.Name,
+                        UpdatedDate = x.UpdatedDate,
+                        SpecificDate = x.SpecificDate.Date,
                     }).ToList();
 
                     return new BusinessResult(200, "Get custome frame list sucess", result);
@@ -56,7 +61,7 @@ namespace BadmintonReservationBusiness
                 }
                 else
                 {
-                    return new BusinessResult(1, "Get custome frame sucess", customFrames);
+                    return new BusinessResult(200, "Get custome frame sucess", customFrames);
                 }
             }
             catch (Exception ex)
@@ -125,17 +130,16 @@ namespace BadmintonReservationBusiness
             await this._unitOfWork.BeginTransactionAsync();
             try
             {
-                var frame = await _unitOfWork.CustomFrameRepository.GetByIdAsync(id);
+                var customFrame = await _unitOfWork.CustomFrameRepository.GetByIdAsync(id);
 
-                if (frame == null)
+                if (customFrame == null)
                 {
                     return new BusinessResult(-1, "No custom frame data");
                 }
-
-                _unitOfWork.CustomFrameRepository.Remove(frame);
+                _unitOfWork.CustomFrameRepository.Remove(customFrame);
                 await _unitOfWork.CommitTransactionAsync();
 
-                return new BusinessResult(200, "Delete custom Success");
+                return new BusinessResult(200, "Delete custom frame Success");
             }
             catch (Exception ex)
             {

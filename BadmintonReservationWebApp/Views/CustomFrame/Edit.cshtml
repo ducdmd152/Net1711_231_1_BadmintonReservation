@@ -1,15 +1,12 @@
-@model BadmintonReservationData.DTOs.UpdateFrameRequestDTO
+@model BadmintonReservationData.DTOs.UpdateCustomFrameRequestDTO
 
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Time From</label>
-        @Html.EditorFor(model => model.TimeFrom, new { htmlAttributes = new { @class = "form-control", @type = "time" } })
-        @Html.ValidationMessageFor(model => model.TimeFrom, "", new { @class = "text-danger" })
-    </div>
-    <div class="col-md-6">
-        <label for="1">Time To</label>
-        @Html.EditorFor(model => model.TimeTo, new { htmlAttributes = new { @class = "form-control", @type = "time" } })
-        @Html.ValidationMessageFor(model => model.TimeTo, "", new { @class = "text-danger" })
+        <label for="1">Specific Date</label>
+            @Html.LabelFor(model => model.SpecificDate, new { @class = "control-label" })
+            @Html.TextBoxFor(model => model.SpecificDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+            @Html.ValidationMessageFor(model => model.SpecificDate, "", new { @class = "text-danger" })
+
     </div>
 </div>
 <div class="form-group row">
@@ -21,28 +18,37 @@
     <div class="col-md-6">
         <label for="1">Status</label>
         @Html.DropDownListFor(model => model.Status, new SelectList(new[]
-        {
-            new { Value = 1, Text = "Active" },
-            new { Value = 2, Text = "Inactive" },
+                 {
+        new { Value = 1, Text = "Active" },
+        new { Value = 2, Text = "Inactive" },
         }, "Value", "Text"), new { @class = "form-control" })
         @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
     </div>
 </div>
 <div class="form-group row">
     <div class="col-md-6">
-        <label for="1">Court</label>
+        <label for="1">Frame</label>
         <select id="CourtId" class="form-control"></select>
-        @Html.ValidationMessageFor(model => model.CourtId, "", new { @class = "text-danger" })
+        @Html.ValidationMessageFor(model => model.FrameId, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="1">Date In Week</label>
+        <select id="DateInWeek" class="form-control"></select>
+        @Html.ValidationMessageFor(model => model.FrameId, "", new { @class = "text-danger" })
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        getAllCourt(@Model.CourtId);
+    $(document).ready(function () {
+        getAllFrame(@Model.FrameId);
+        getAllData(@Model.DateType);
     });
 
-    function getAllCourt(selectedCourtId) {
+    function getAllFrame(frameId) {
         $.ajax({
-            url: '@Url.Action("GetAll", "CustomFrame")',
+            url: '@Url.Action("GetAll", "Frame")',
             type: "GET",
             contentType: "application/json;charset=utf-8",
             dataType: "json",
@@ -50,20 +56,59 @@
                 // Clear previous options
                 $('#CourtId').empty();
                 // Add each court as an option to the dropdown list
-                $.each(result, function(key, item) {
+
+                $.each(result, function (key, item) {
+
+                    var text = extractHourAndMinute(item.timeFrom) + "-" + extractHourAndMinute(item.timeTo) + "-"
+                        + item.court.name;
+
+
                     $('#CourtId').append($('<option>', {
                         value: item.id,
-                        text: item.name,
-                        selected: item.id === selectedCourtId
+                        text: text,
+                        selected: item.id === frameId
                     }));
                 });
             },
             error: function (xhr, error) {
                 alert(xhr.statusText);
-                alert('Something went wrong!');
+                alert(`Something went wrong!`);
             }
         });
     }
+
+    function getAllData(dateType) {
+        $.ajax({
+            url: '@Url.Action("GetAll", "DateType")',
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                // Clear previous options
+                $('#DateInWeek').empty();
+                // Add each court as an option to the dropdown list
+                $.each(result, function (key, item) {
+                    $('#DateInWeek').append($('<option>', {
+                        value: item.id,
+                        text: item.name,
+                        selected: item.id === dateType
+                    }));
+                });
+            },
+            error: function (xhr, error) {
+                alert(xhr.statusText);
+                alert(`Something went wrong!`);
+            }
+        });
+    }
+
+    function extractHourAndMinute(datetimeStr) {
+        let date = new Date(datetimeStr);
+        let hours = date.getHours().toString().padStart(2, '0');
+        let minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
 </script>
 @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");

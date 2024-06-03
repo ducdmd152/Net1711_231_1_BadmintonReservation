@@ -14,5 +14,9 @@ namespace BadmintonReservationData.DTOs
         public int DateType { get; set; }
         public string DateTypeName { get; set; }
         public int Status { get; set; }
+        public DateTime TimeFrom { get; set; }
+        public DateTime TimeTo { get; set; }
+        public string CourtName { get; set; }
+        public DateTime UpdatedDate { get; set; }
     } 
 }

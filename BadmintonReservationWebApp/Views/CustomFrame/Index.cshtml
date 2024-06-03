@@ -19,11 +19,11 @@
             <thead>
             <tr class="card-header">
                 <th class="card-title text-center">ID</th>
-                <th class="card-title text-center">Time From</th>
-                <th class="card-title text-center">Time To</th>
+                <th class="card-title text-center">Specific Date</th>
+                <th class="card-title text-center">Date Name</th>
                 <th class="card-title text-center">Status</th>
                 <th class="card-title text-center">Price</th>
-                <th class="card-title text-center">Court Name</th>
+                <th class="card-title text-center">Frame Infor</th>
                 <th class="card-title text-center">Last Updated Date</th>
                 <th class="card-title text-center"></th>
             </tr>
@@ -75,14 +75,15 @@
                     var html = '';
                     // console.log(result);
                     $.each(result, function (key, item) {
-                        console.log(item);
+                        console.log(item)
+                        var frameDetail = extractHourAndMinute(item.timeFrom) + " - " + extractHourAndMinute(item.timeTo) + " | " + item.courtName;
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
-                        html += '<td>' + extractHourAndMinute(item.timeFrom) + '</td>';
-                        html += '<td>' + extractHourAndMinute(item.timeTo) + '</td>';
+                        html += '<td>' + item.specificDate.split('T')[0] + '</td>';
+                        html += '<td>' + item.dateTypeName +'</td>';
                         html += '<td>' + statusMap[item.status] + '</td>';
                         html += '<td>' + formatPrice(item.price) + ' VNĐ' + '</td>';
-                        html += '<td>' + item.court.name + '</td>';
+                        html += '<td>' + frameDetail + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
                         html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
@@ -139,55 +140,36 @@
     function create() {
         // Manually trigger validation
         if ($('#frm').valid()) {
-            // Get values from form
-            var timeFrom = $("#TimeFrom").val();
-            var timeTo = $("#TimeTo").val();
+        
+            // Proceed with AJAX request
+            var data = {
+                frameId: $("#CourtId").val(),
+                dateType: $("#DateInWeek").val(),
+                specificDate: $("#SpecificDate").val(),
+                status: $("#Status").val(),
+                price: $("#Price").val(),
+            };
 
-            // Convert time strings to Date objects
-            var timeFromDate = new Date("2000-01-01T" + timeFrom);
-            var timeToDate = new Date("2000-01-01T" + timeTo);
-
-            // Check if TimeFrom is less than TimeTo
-            if (timeFromDate < timeToDate) {
-                // Ensure the times are formatted as "hh:mm:ss"
-                var timeFromParts = timeFrom.split(':');
-                var timeToParts = timeTo.split(':');
-
-                var timeFromFormatted = timeFromParts[0].padStart(2, '0') + ':' + timeFromParts[1].padStart(2, '0') + ':00';
-                var timeToFormatted = timeToParts[0].padStart(2, '0') + ':' + timeToParts[1].padStart(2, '0') + ':00';
-                // Proceed with AJAX request
-                var data = {
-                    timeFrom: timeFromFormatted,
-                    timeTo: timeToFormatted,
-                    status: $("#Status").val(),
-                    price: $("#Price").val(),
-                    courtId: $("#CourtId").val(),
-                };
-
-                // AJAX request
-                console.log(data);
-                $.ajax({
-                    type: 'POST',
-                        url: '@Url.Action("Create", "CustomFrame")',
-                    contentType: 'application/json;charset=utf-8',
-                    dataType: "json",
-                    data: JSON.stringify(data),
-                    success: function (result) {
-                        if (result.status >= 1) {
-                            $('#topUpModal').modal('hide');
-                            loadData();
-                        }
-                        alert("Created new frame successfully!");
-                    },
-                    error: function (xhr, error) {
-                        console.log(xhr);
-                        alert(`Something went wrong!`);
+            // AJAX request
+            console.log(data);
+            $.ajax({
+                type: 'POST',
+                    url: '@Url.Action("Create", "CustomFrame")',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $('#topUpModal').modal('hide');
+                        loadData();
                     }
-                });
-            } else {
-                // Show error message
-                $("#TimeTo").siblings(".text-danger").text("Time To must be greater than Time From.");
-            }
+                    alert("Created new frame successfully!");
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                    alert(`Something went wrong!`);
+                }
+            });
         }
     }
 
@@ -215,7 +197,7 @@
         $("#topUpModalContent").html("");
             $("#topUpModalLabel").html(`Edit booking [${id}]`);
             $.ajax({
-                url: '@Url.Action("Edit", "Frame")' + '/' + id,
+                url: '@Url.Action("Edit", "CustomFrame")' + '/' + id,
                 type: "GET",
                 success: function (result) {
                     $("#topUpModalContent").html(result);
@@ -234,57 +216,46 @@
     function update(id) {
         // Manually trigger validation
         if ($('#frm').valid()) {
-            // Get values from form
-            var timeFrom = $("#TimeFrom").val();
-            var timeTo = $("#TimeTo").val();
 
-            // Convert time strings to Date objects
-            var timeFromDate = new Date("2000-01-01T" + timeFrom);
-            var timeToDate = new Date("2000-01-01T" + timeTo);
+            // Proceed with AJAX request
+            var data = {
+                id: id,
+                frameId: $("#CourtId").val(),
+                dateType: $("#DateInWeek").val(),
+                specificDate: $("#SpecificDate").val(),
+                status: $("#Status").val(),
+                price: $("#Price").val(),
+            };
 
-            // Check if TimeFrom is less than TimeTo
-            if (timeFromDate < timeToDate) {
-                // Ensure the times are formatted as "hh:mm:ss"
-                var timeFromParts = timeFrom.split(':');
-                var timeToParts = timeTo.split(':');
 
-                var timeFromFormatted = timeFromParts[0].padStart(2, '0') + ':' + timeFromParts[1].padStart(2, '0') + ':00';
-                var timeToFormatted = timeToParts[0].padStart(2, '0') + ':' + timeToParts[1].padStart(2, '0') + ':00';
-                // Proceed with AJAX request
-                var data = {
-                    id: id,
-                    timeFrom: timeFromFormatted,
-                    timeTo: timeToFormatted,
-                    status: $("#Status").val(),
-                    price: $("#Price").val(),
-                    courtId: $("#CourtId").val(),
-                };
-
-                // AJAX request
-                console.log(data);
-                $.ajax({
-                    type: 'PUT',
-                    url: '@Url.Action("Update", "Frame")',
-                    contentType: 'application/json;charset=utf-8',
-                    dataType: "json",
-                    data: JSON.stringify(data),
-                    success: function (result) {
-                        if (result.status >= 1) {
-                            $('#topUpModal').modal('hide');
-                            loadData();
-                        }
-                        alert(`Update frame ${id} successfully!`);
-                    },
-                    error: function (xhr, error) {
-                        console.log(xhr);
-                        alert(`Something went wrong!`);
+            // AJAX request
+            console.log(data);
+            $.ajax({
+                type: 'PUT',
+                url: '@Url.Action("Update", "CustomFrame")',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $('#topUpModal').modal('hide');
+                        loadData();
                     }
-                });
-            } else {
-                // Show error message
-                $("#TimeTo").siblings(".text-danger").text("Time To must be greater than Time From.");
-            }
+                    alert(`Update frame ${id} successfully!`);
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                    alert(`Something went wrong!`);
+                }
+            });
         }
+    }
+
+    function formatDateTime(dateTimeString, format) {
+        var dateTime = new Date(dateTimeString);
+        var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+
+        return formattedDateTime;
     }
 
     </script>

@@ -8,7 +8,7 @@ namespace BadmintonReservationWebApp.Controllers
 {
     public class CustomFrameController : Controller
     {
-        private readonly string API_URL_ENDPOINT = "https://localhost:7257/";
+        private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/CustomFrame";
 
         public IActionResult Index()
         {
@@ -18,15 +18,15 @@ namespace BadmintonReservationWebApp.Controllers
         [HttpGet]
         public IActionResult Add()
         {
-            return PartialView("Add", new CreateFrameRequestDTO());
+            return PartialView("Add", new CreateCustomFrameRequestDTO());
         }
 
         [HttpGet]
-        public async Task<List<Frame>> GetAll()
+        public async Task<List<CustomFrameDTO>> GetAll()
         {
             try
             {
-                var result = new List<Frame>();
+                var result = new List<CustomFrameDTO>();
                 using (var httpClient = new HttpClient())
                 {
                     using (var response = await httpClient.GetAsync(API_URL_ENDPOINT + "/GetAll"))
@@ -34,7 +34,7 @@ namespace BadmintonReservationWebApp.Controllers
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<List<Frame>>(content);
+                            result = JsonConvert.DeserializeObject<List<CustomFrameDTO>>(content);
                         }
                     }
                 }
@@ -48,7 +48,7 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<Frame> Create([FromBody] CreateFrameRequestDTO createFrameRequestDto)
+        public async Task<CustomFrameDTO> Create([FromBody] CreateCustomFrameRequestDTO createFrameRequestDto)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace BadmintonReservationWebApp.Controllers
                         if (response.IsSuccessStatusCode)
                         {
                             var responseContent = await response.Content.ReadAsStringAsync();
-                            var createdFrame = JsonConvert.DeserializeObject<Frame>(responseContent);
+                            var createdFrame = JsonConvert.DeserializeObject<CustomFrameDTO>(responseContent);
                             return createdFrame;
                         }
                         else
@@ -83,7 +83,7 @@ namespace BadmintonReservationWebApp.Controllers
         {
             try
             {
-                UpdateFrameRequestDTO result = null;
+                UpdateCustomFrameRequestDTO result = null;
                 using (var httpClient = new HttpClient())
                 {
                     using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}/GetById/{id}"))
@@ -91,14 +91,14 @@ namespace BadmintonReservationWebApp.Controllers
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            var frameResponse = JsonConvert.DeserializeObject<FrameResponseDTO>(content);
-                            result = new UpdateFrameRequestDTO()
+                            var frameResponse = JsonConvert.DeserializeObject<CustomFrame>(content);
+                            result = new UpdateCustomFrameRequestDTO()
                             {
                                 Id = frameResponse.Id,
-                                TimeFrom = frameResponse.TimeFrom,
-                                TimeTo = frameResponse.TimeTo,
+                                FrameId = frameResponse.FrameId,
                                 Price = frameResponse.Price,
-                                CourtId = frameResponse.CourtId,
+                                SpecificDate = frameResponse.SpecificDate,
+                                DateType = frameResponse.FixedDateTypeId,
                                 Status = frameResponse.Status
                             };
                         }
@@ -114,13 +114,13 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpPut]
-        public async Task<Frame> Update([FromBody] UpdateFrameRequestDTO updateFrameRequestDto)
+        public async Task<Frame> Update([FromBody] UpdateCustomFrameRequestDTO updateCusFrameRequestDto)
         {
             try
             {
                 using (var httpClient = new HttpClient())
                 {
-                    var json = JsonConvert.SerializeObject(updateFrameRequestDto);
+                    var json = JsonConvert.SerializeObject(updateCusFrameRequestDto);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
                     using (var response = await httpClient.PutAsync($"{API_URL_ENDPOINT}/Update", content))
                     {

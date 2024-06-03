@@ -14,6 +14,7 @@ builder.Services.AddScoped<BookingBusiness>();
 builder.Services.AddScoped<CourtBusiness>();
 builder.Services.AddScoped<CustomFrameBusiness>();
 builder.Services.AddScoped<FrameBusiness>();
+builder.Services.AddScoped<DateTypeBusiness>();
 
 var app = builder.Build();
 
