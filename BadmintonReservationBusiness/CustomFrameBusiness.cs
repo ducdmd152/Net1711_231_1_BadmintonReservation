@@ -1,6 +1,7 @@
 ﻿using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
 using BadmintonReservationData.Enums;
+using BadmintonReservationData.Utils;
 
 namespace BadmintonReservationBusiness
 {
@@ -17,15 +18,24 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var customFrames = await this._unitOfWork.CustomFrameRepository.GetAllAsync();
+                var customFrames = await this._unitOfWork.CustomFrameRepository.GetAllAsync();          
 
                 if (customFrames == null)
                 {
-                    return new BusinessResult(400, "No court data");
+                    return new BusinessResult(400, "No custome frame data");
                 }
                 else
                 {
-                    return new BusinessResult(200, "Get court list sucess", customFrames);
+                    var result = customFrames.Select(x => new CustomFrameDTO
+                    {
+                        Id = x.Id,
+                        DateTypeName = EnumHelper.GetEnumDescription<DateTypes>(x.FixedDateTypeId),
+                        Price = x.Price,
+                        Status = x.Status,
+                        FrameId = x.FrameId,
+                    }).ToList();
+
+                    return new BusinessResult(200, "Get custome frame list sucess", result);
                 }
             }
             catch (Exception ex)
@@ -42,11 +52,11 @@ namespace BadmintonReservationBusiness
 
                 if (customFrames == null)
                 {
-                    return new BusinessResult(-1, "No court data");
+                    return new BusinessResult(-1, "No custome frame data");
                 }
                 else
                 {
-                    return new BusinessResult(1, "Get court sucess", customFrames);
+                    return new BusinessResult(1, "Get custome frame sucess", customFrames);
                 }
             }
             catch (Exception ex)
@@ -55,18 +65,18 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> CreateCourt(CustomFrameDTO customFrameRequest)
+        public async Task<IBusinessResult> CreateCustomFrame(CreateCustomFrameRequestDTO customFrameRequest)
         {
             await this._unitOfWork.BeginTransactionAsync();
             try
             {
                 var customFrame = new CustomFrame
                 {
-                    FrameId = customFrameRequest.frameId,
-                    Price = customFrameRequest.pirce,
-                    SpecificDate = customFrameRequest.specificDate,
-                    Status = customFrameRequest.status,
-                    FixedDateTypeId = customFrameRequest.dateType
+                    FrameId = customFrameRequest.FrameId,
+                    Price = customFrameRequest.Price,
+                    SpecificDate = customFrameRequest.SpecificDate,
+                    Status = customFrameRequest.Status,
+                    FixedDateTypeId = customFrameRequest.DateType
                 };
 
                 await this._unitOfWork.CustomFrameRepository.CreateAsync(customFrame);              
@@ -77,6 +87,60 @@ namespace BadmintonReservationBusiness
             {
                 this._unitOfWork.RollbackTransaction();
                 return new BusinessResult(-4, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> UpdateCustomFrame(UpdateCustomFrameRequestDTO updateCustomFrameRequestDto)
+        {
+            await this._unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var frame = await _unitOfWork.CustomFrameRepository.GetByIdAsync(updateCustomFrameRequestDto.Id);
+
+                if (frame == null)
+                {
+                    return new BusinessResult(400, "No custom frame data");
+                }
+
+                frame.Status = updateCustomFrameRequestDto.Status;
+                frame.Price = updateCustomFrameRequestDto.Price;
+                frame.FrameId = updateCustomFrameRequestDto.FrameId;
+                frame.FixedDateTypeId = updateCustomFrameRequestDto.DateType;
+                frame.SpecificDate = updateCustomFrameRequestDto.SpecificDate;
+
+                _unitOfWork.CustomFrameRepository.Update(frame);
+                await _unitOfWork.CommitTransactionAsync();
+
+                return new BusinessResult(200, "Update custom frame success");
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> RemoveCustomFrame(int id)
+        {
+            await this._unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var frame = await _unitOfWork.CustomFrameRepository.GetByIdAsync(id);
+
+                if (frame == null)
+                {
+                    return new BusinessResult(-1, "No custom frame data");
+                }
+
+                _unitOfWork.CustomFrameRepository.Remove(frame);
+                await _unitOfWork.CommitTransactionAsync();
+
+                return new BusinessResult(200, "Delete custom Success");
+            }
+            catch (Exception ex)
+            {
+                this._unitOfWork.RollbackTransaction();
+                return new BusinessResult(500, ex.Message);
             }
         }
     }

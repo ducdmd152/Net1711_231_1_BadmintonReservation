@@ -13,6 +13,7 @@ builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<BookingBusiness>();
 builder.Services.AddScoped<CourtBusiness>();
 builder.Services.AddScoped<CustomFrameBusiness>();
+builder.Services.AddScoped<FrameBusiness>();
 
 var app = builder.Build();
 

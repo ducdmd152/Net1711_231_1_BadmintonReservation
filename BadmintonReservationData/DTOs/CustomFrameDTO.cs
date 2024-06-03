@@ -1,7 +1,18 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations;
+
 namespace BadmintonReservationData.DTOs
 {
-    public sealed record CustomFrameDTO(int id, int frameId, double pirce, DateTime specificDate, int dateType, string dateTypeName, 
-        int status); 
+    public class CustomFrameDTO
+    {
+        public int Id { get; set; }
+        [Required(ErrorMessage = "Time From is required")]
+        public int FrameId { get; set; }
+        public double Price { get; set; }
+        public DateTime SpecificDate { get; set; }
+        public int DateType { get; set; }
+        public string DateTypeName { get; set; }
+        public int Status { get; set; }
+    } 
 }
