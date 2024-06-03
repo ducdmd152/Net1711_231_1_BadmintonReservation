@@ -14,6 +14,7 @@ public class PurchasedController : Controller
     {
     }
 
+
     public async Task<IActionResult> Index()
     {
         return View();
@@ -136,4 +137,39 @@ public class PurchasedController : Controller
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        try
+        {
+            UpdatePurchasedRequestDTO result = null;
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}/GetById/{id}"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var purchasedResponse = JsonConvert.DeserializeObject<PurchasedResponseDTO>(content);
+                        result = new UpdatePurchasedRequestDTO()
+                        {
+                            Id = purchasedResponse.Id,
+                            AmountHour = purchasedResponse.AmountHour,
+                            Status = purchasedResponse.Status,
+                            CustomerId = purchasedResponse.CustomerId,
+                            PaymentId = purchasedResponse.PaymentId,
+                        };
+                    }
+                }
+            }
+
+            return PartialView("edit", result);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
 }
