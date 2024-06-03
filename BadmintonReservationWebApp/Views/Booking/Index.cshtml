@@ -193,7 +193,7 @@
 
         function formatDateTime(dateTimeString, format) {
             var dateTime = new Date(dateTimeString);
-            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+                var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
 
             return formattedDateTime;
         }
