@@ -19,6 +19,7 @@ namespace BadmintonReservationData
 
         private BookingRepository _bookingRepository;
         private CourtRepository _courtRepository;
+        private PurchasedRepository _purchasedRepository;
         private BookingDetailRepository _bookingDetailRepository;
         private CustomerFrameRepository _customFramRepository;
 
@@ -51,6 +52,14 @@ namespace BadmintonReservationData
             get
             {
                 return _courtRepository ??= new CourtRepository(this);
+            }
+        }
+
+        public PurchasedRepository PurchasedRepository
+        {
+            get
+            {
+                return _purchasedRepository ??= new PurchasedRepository(this);
             }
         }
 
