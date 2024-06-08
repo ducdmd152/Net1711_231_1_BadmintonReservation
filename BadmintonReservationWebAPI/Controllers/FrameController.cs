@@ -23,6 +23,14 @@ namespace BadmintonReservationWebAPI.Controllers
             return GenerateActionResult(result);
         }
 
+        [HttpGet]
+        [Route("available")]
+        public async Task<IActionResult> GetAllFrameAvailableOfForDate()
+        {
+            var result = await _business.GetAllFrameAvailableForDate(DateTime.Now);
+            return GenerateActionResult(result);
+        }
+
         private IActionResult GenerateActionResult(IBusinessResult result)
         {
             switch (result.Status)
