@@ -1,0 +1,25 @@
+﻿@model BadmintonReservationData.DTOs.CreatePurchasedRequestDTO
+
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="AmountHour">Amount Hour</label>
+        @Html.EditorFor(model => model.AmountHour, new { htmlAttributes = new { @class = "form-control", @type = "number", @min = "0", @step = "0.1" } })
+    </div>
+    <div class="col-md-6">
+        <label for="Status">Status</label>
+        @Html.DropDownListFor(model => model.Status, new SelectList(new[] {
+        new { Value = 1, Text = "Active" },
+        new { Value = 2, Text = "Inactive" }
+        }, "Value", "Text"), new { @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="CustomerId">Customer ID</label>
+        @Html.EditorFor(model => model.CustomerId, new { htmlAttributes = new { @class = "form-control", @type = "number" } })
+    </div>
+    <div class="col-md-6">
+        <label for="PaymentId">Payment ID</label>
+        @Html.EditorFor(model => model.PaymentId, new { htmlAttributes = new { @class = "form-control", @type = "number" } })
+    </div>
+</div>

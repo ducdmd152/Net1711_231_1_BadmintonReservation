@@ -1,5 +1,5 @@
 ﻿using BadmintonReservationData.Base;
-using BadmintonReservationData.Enum;
+using BadmintonReservationData.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,5 +33,12 @@ namespace BadmintonReservationData.Repository
                               .Include(item => item.Court)
                               .ToListAsync();
         }
+        
+        public async Task<List<Frame>> GetAllWithCourtAsync()
+    	{
+	        return await _dbSet
+	            .Include(item => item.Court)
+	            .ToListAsync();
+    	}
     }
 }

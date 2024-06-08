@@ -1,5 +1,5 @@
 ﻿using BadmintonReservationData.Base;
-using BadmintonReservationData.Enum;
+using BadmintonReservationData.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

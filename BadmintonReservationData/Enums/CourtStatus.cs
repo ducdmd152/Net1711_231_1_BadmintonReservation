@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadmintonReservationData.Enum
+namespace BadmintonReservationData.Enums
 {
-    public enum FrameStatus
+    public enum CourtStatus
     {
-        Active = 1, Inactive = 3
+        Active = 1, Inactive = 2
     }
 }

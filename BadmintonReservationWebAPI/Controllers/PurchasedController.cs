@@ -1,16 +1,15 @@
-using BadmintonReservationBusiness;
+﻿using BadmintonReservationBusiness;
 using BadmintonReservationData.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BadmintonReservationWebAPI.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
-public class FrameController : ControllerBase
+public class PurchasedController : ControllerBase
 {
-    private readonly FrameBusiness _business;
+    private readonly PurchasedBusiness _business;
 
-    public FrameController(FrameBusiness business)
+    public PurchasedController(PurchasedBusiness business)
     {
         _business = business;
     }
@@ -19,33 +18,7 @@ public class FrameController : ControllerBase
     [Route("GetAll")]
     public async Task<IActionResult> GetAll()
     {
-        var result = await _business.GetAll();
-        switch (result.Status)
-        {
-            case 400:
-                return BadRequest(result);
-            case 404:
-                return NotFound(result);
-            case 200:
-                return Ok(result.Data);
-            default:
-                return StatusCode(500, "An internal server error occurred. Please try again later.");
-        }
-    }
-    
-    [HttpGet]
-    [Route("court/{id}/available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id, [FromQuery] DateTime bookingDate)
-    {
-        var result = await _business.GetAllFrameAvailableOfCourtForDate(id, bookingDate);
-        return GenerateActionResult(result);
-    }
-    
-    [HttpGet]
-    [Route("GetById/{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var result = await _business.GetById(id);
+        var result = await _business.GetAllPurchased();
         switch (result.Status)
         {
             case 400:
@@ -60,18 +33,28 @@ public class FrameController : ControllerBase
     }
 
     [HttpGet]
-    [Route("available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfForDate([FromQuery] DateTime bookingDate)
+    [Route("GetById/{id}")]
+    public async Task<IActionResult> GetById(int id)
     {
-        var result = await _business.GetAllFrameAvailableForDate(bookingDate);
-        return GenerateActionResult(result);
+        var result = await _business.GetPurchasedById(id);
+        switch (result.Status)
+        {
+            case 400:
+                return BadRequest(result);
+            case 404:
+                return NotFound(result);
+            case 200:
+                return Ok(result.Data);
+            default:
+                return StatusCode(500, "An internal server error occurred. Please try again later.");
+        }
     }
-    
+
     [HttpPost]
     [Route("Create")]
-    public async Task<IActionResult> CreateFrame(CreateFrameRequestDTO createFrameRequest)
+    public async Task<IActionResult> CreatePurchased(CreatePurchasedRequestDTO createPurchasedRequest)
     {
-        var result = await _business.CreateFrame(createFrameRequest);
+        var result = await _business.CreatePurchased(createPurchasedRequest);
         switch (result.Status)
         {
             case 400:
@@ -87,9 +70,9 @@ public class FrameController : ControllerBase
 
     [HttpPut]
     [Route("Update")]
-    public async Task<IActionResult> UpdateFrame(UpdateFrameRequestDTO updateFrameRequest)
+    public async Task<IActionResult> UpdatePurchased(UpdatePurchasedRequestDTO updatePurchasedRequest)
     {
-        var result = await _business.UpdateFrame(updateFrameRequest);
+        var result = await _business.UpdatePurchased(updatePurchasedRequest);
         switch (result.Status)
         {
             case 400:
@@ -105,9 +88,9 @@ public class FrameController : ControllerBase
 
     [HttpDelete]
     [Route("Delete/{id}")]
-    public async Task<IActionResult> RemoveFrame(int id)
+    public async Task<IActionResult> RemovePurchased(int id)
     {
-        var result = await _business.RemoveFrame(id);
+        var result = await _business.RemovePurchased(id);
         switch (result.Status)
         {
             case 400:
@@ -120,38 +103,4 @@ public class FrameController : ControllerBase
                 return StatusCode(500, "An internal server error occurred. Please try again later.");
         }
     }
-    
-	[HttpGet]
-    [Route("court/{id}/available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id)
-    {
-            var result = await _business.GetAllFrameAvailableOfCourtForDate(id, DateTime.Now);
-            return GenerateActionResult(result);
-    }
-
-    private IActionResult GenerateActionResult(IBusinessResult result)
-    {
-        switch (result.Status)
-        {
-            case 400:
-                return BadRequest(result);
-            case 404:
-                return NotFound(result);
-            case 200:
-                return Ok(result.Data);
-            case 201:
-                return StatusCode(201, result.Data);
-            default:
-                return StatusCode(500, "An internal server error occurred. Please try again later.");
-        }
-    }
-
-    [HttpGet]
-    [Route("available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfForDate()
-    {
-        var result = await _business.GetAllFrameAvailableForDate(DateTime.Now);
-        return GenerateActionResult(result);
-    }
-
 }
