@@ -28,8 +28,8 @@
                     <th class="card-title text-center">Type</th>                            
                     <th class="card-title text-center">Details</th>
                     <th class="card-title text-center">Promotion Amount</th>
-                    <th class="card-title text-center">Payment Type</th>
-                    <th class="card-title text-center">Last Updated Date</th>
+                    <th class="card-title text-center">Payment</th>
+                    <th class="card-title text-center">Last Updated</th>
                     <th class="card-title text-center"></th>
                 </tr>
             </thead>
@@ -84,10 +84,16 @@
                         1: 'Offline',
                         2: 'Online',
                     }
+                    const paymentStatusMap = {
+                        1: 'Not yet',
+                        2: 'Paid',
+                        3: 'Fail',
+                        4: 'Refund'
+                    }
                     const bookingTypeMap = {
                         1: 'Normaly',
                         2: 'Monthly',
-                        5: 'By buyed hours'
+                        5: 'Hourly'
                     }
                     var html = '';
                     // console.log(result);
@@ -100,7 +106,7 @@
                         html += '<td>' + bookingTypeMap[item.bookingTypeId] + '</td>';
                         html += '<td>' + generateBookingDetailsHTML(item.bookingDetails) + '</td>';
                         html += '<td>' + item.promotionAmount + '</td>';
-                        html += '<td>' + paymentTypeMap[item.paymentType] + '</td>';
+                        html += '<td>' + paymentTypeMap[item.paymentType] + ' | ' + paymentStatusMap[item.paymentStatus] + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
                         html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
