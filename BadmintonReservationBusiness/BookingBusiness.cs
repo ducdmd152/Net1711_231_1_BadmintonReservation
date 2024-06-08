@@ -1,5 +1,6 @@
 ﻿using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Enum;
 using System.Linq.Expressions;
 
 namespace BadmintonReservationBusiness
@@ -88,9 +89,24 @@ namespace BadmintonReservationBusiness
                     }
                 };
 
+                if (bookingRequest.BookingTypeId == (int)BookingTypeEnum.Hourly)
+                {
+                    var customer = this._unitOfWork.CustomerRepository.GetById(bookingRequest.CustomerId);
+                    var requestAmountOfTime = bookingRequest.BookingDetails.Sum(item => (item.TimeTo - item.TimeFrom) / 100 + ((item.TimeTo - item.TimeFrom)%100) / 60);
+                    if (customer.TotalHoursMonthly < requestAmountOfTime)
+                    {
+                        return new BusinessResult(400, "Not enough amount of purchased hours for done this booking!");
+                    }
+                    else
+                    {
+                        customer.TotalHoursMonthly -= requestAmountOfTime;
+                        this._unitOfWork.CustomerRepository.Update(customer);
+                    }
+                }
+
                 await this._unitOfWork.BookingRepository.CreateAsync(booking);
                 await this._unitOfWork.CommitTransactionAsync();
-                return new BusinessResult(201, "Booking created successfully", booking);
+                return new BusinessResult(200, "Booking created successfully", booking);
             }
             catch (Exception ex)
             {

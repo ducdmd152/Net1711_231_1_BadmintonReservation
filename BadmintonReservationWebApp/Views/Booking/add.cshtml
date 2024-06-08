@@ -21,23 +21,27 @@
 </div>
 <div class="form-group row">
     <div class="col-md-6">
+        <label for="PaymentType">Payment Type</label>
+        @Html.DropDownListFor(model => model.CustomerId, new SelectList(Model.Customers, "Id", "FullName"), new { @class = "form-control" })
+    </div>
+    <div class="col-md-6">
         <label for="PromotionAmount">Promotion Amount</label>
         @Html.EditorFor(model => model.PromotionAmount, new
             {
                 htmlAttributes = new { @class = "form-control", @min = "0", @step = "1000" }
             })
     </div>
+    
+</div>
+
+<div class="form-group row">
     <div class="col-md-6">
         <label for="PaymentType">Payment Type</label>
         @Html.DropDownListFor(model => model.PaymentType, new SelectList(new[] {
         new { Value = 1, Text = "Offline" },
         new { Value = 2, Text = "Online" },
         }, "Value", "Text"), new { @class = "form-control" })
-        @Html.Hidden("CustomerId", Model.CustomerId)
     </div>
-</div>
-
-<div class="form-group row">
     <div class="col-md-6">
         <label for="PaymentStatus">Payment Status</label>
         @Html.DropDownListFor(model => model.PaymentStatus, new SelectList(new[] {
@@ -46,7 +50,6 @@
         new { Value = 3, Text = "Failed" },
         new { Value = 4, Text = "Refund" },
         }, "Value", "Text"), new { @class = "form-control" })
-        @Html.Hidden("CustomerId", Model.CustomerId)
     </div>
 </div>
 

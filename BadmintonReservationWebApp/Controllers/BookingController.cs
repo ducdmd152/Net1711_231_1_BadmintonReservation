@@ -29,9 +29,32 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
-            return PartialView("add", new AddBookingModel());
+            try
+            {
+                var customers = new List<Customer>();
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Customer"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            customers = JsonConvert.DeserializeObject<List<Customer>>(content);
+                        }
+                    }
+                }
+
+                return PartialView("add", new AddBookingModel()
+                {
+                    Customers = customers
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         [HttpGet]
