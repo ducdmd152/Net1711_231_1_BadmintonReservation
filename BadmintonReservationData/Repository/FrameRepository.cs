@@ -15,6 +15,15 @@ namespace BadmintonReservationData.Repository
         {            
         }
 
+        public async Task<List<Frame>> GetAllFrameAvailableForDate()
+        {
+            return await this._dbSet
+                              .IgnoreAutoIncludes()
+                              .Where(item => item.Status == (int)FrameStatus.Active)
+                              .Include(item => item.Court)
+                              .ToListAsync();
+        }
+
         public async Task<List<Frame>> GetAllFrameAvailableOfCourtForDate(int id)
         {
             return await this._dbSet

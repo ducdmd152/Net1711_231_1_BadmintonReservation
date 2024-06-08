@@ -32,6 +32,54 @@ public class FrameBusiness
         }
     }
 
+        public async Task<IBusinessResult> GetAllFrameAvailableForDate(DateTime bookingDate)
+        {
+            try
+            {
+                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableForDate();
+                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
+
+                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
+                
+                if (availableFrameForBookingDate == null)
+                {
+                    return new BusinessResult(400, "No frame data");
+                }
+                else
+                {
+                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> GetAllFrameAvailableOfCourtForDate(int id, DateTime bookingDate)
+        {
+            try
+            {
+                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableOfCourtForDate(id);
+                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
+
+                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
+
+                if (availableFrameForBookingDate == null)
+                {
+                    return new BusinessResult(400, "No frame data");
+                }
+                else
+                {
+                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+    
     public async Task<IBusinessResult> GetById(int id)
     {
         try
@@ -139,29 +187,5 @@ public class FrameBusiness
             this.unitOfWork.RollbackTransaction();
             return new BusinessResult(500, ex.Message);
         }
-    }
-    
-     public async Task<IBusinessResult> GetAllFrameAvailableOfCourtForDate(int id, DateTime bookingDate)
-        {
-            try
-            {
-                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableOfCourtForDate(id);
-                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
-
-                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
-                
-                if (availableFrameForBookingDate == null)
-                {
-                    return new BusinessResult(400, "No frame data");
-                }
-                else
-                {
-                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
-                }
-            }
-            catch (Exception ex)
-            {
-                return new BusinessResult(500, ex.Message);
-            }
-        }
+    }  
 }

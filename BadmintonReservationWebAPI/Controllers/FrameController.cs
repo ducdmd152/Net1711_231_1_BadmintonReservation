@@ -111,7 +111,7 @@ public class FrameController : ControllerBase
     {
             var result = await _business.GetAllFrameAvailableOfCourtForDate(id, DateTime.Now);
             return GenerateActionResult(result);
-        }
+    }
 
     private IActionResult GenerateActionResult(IBusinessResult result)
     {
@@ -119,15 +119,23 @@ public class FrameController : ControllerBase
         {
             case 400:
                 return BadRequest(result);
-			case 404:
-	        	return NotFound(result);
-    		case 200:
+            case 404:
+                return NotFound(result);
+            case 200:
                 return Ok(result.Data);
-	        case 201:
-	        	return StatusCode(201, result.Data);	
-                default:
-                    return StatusCode(500, "An internal server error occurred. Please try again later.");
+            case 201:
+                return StatusCode(201, result.Data);
+            default:
+                return StatusCode(500, "An internal server error occurred. Please try again later.");
         }
+    }
+
+    [HttpGet]
+    [Route("available")]
+    public async Task<IActionResult> GetAllFrameAvailableOfForDate()
+    {
+        var result = await _business.GetAllFrameAvailableForDate(DateTime.Now);
+        return GenerateActionResult(result);
     }
 
 }

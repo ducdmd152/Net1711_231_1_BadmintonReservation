@@ -11,12 +11,13 @@ using Newtonsoft.Json;
 using System.Security.Policy;
 using System.Text;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationWebApp.Models;
 
 namespace BadmintonReservationWebApp.Controllers
 {
     public class BookingController : Controller
     {
-        private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/Booking/";
+        private readonly string API_URL_ENDPOINT = "https://localhost:7257/api/";
 
         public BookingController()
         {
@@ -30,7 +31,7 @@ namespace BadmintonReservationWebApp.Controllers
         [HttpGet]
         public IActionResult Add()
         {
-            return PartialView("add", new Booking());
+            return PartialView("add", new AddBookingModel());
         }
 
         [HttpGet]
@@ -41,7 +42,7 @@ namespace BadmintonReservationWebApp.Controllers
                 Booking result = null;
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}{id}"))
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Booking/{id}"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -67,12 +68,38 @@ namespace BadmintonReservationWebApp.Controllers
                 var result = new List<Booking>();
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync(API_URL_ENDPOINT))
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Booking/"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
                             result = JsonConvert.DeserializeObject<List<Booking>>(content);
+                        }
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<List<Frame>> GetFrameAvailable()
+        {
+            try
+            {
+                var result = new List<Frame>();
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Frame/available/"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<List<Frame>>(content);
                         }
                     }
                 }
@@ -93,7 +120,7 @@ namespace BadmintonReservationWebApp.Controllers
                 Booking result = null;
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}{id}"))
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Booking/{id}"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -120,7 +147,7 @@ namespace BadmintonReservationWebApp.Controllers
                 {
                     var json = JsonConvert.SerializeObject(booking);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    using (var response = await httpClient.PostAsync($"{API_URL_ENDPOINT}", content))
+                    using (var response = await httpClient.PostAsync($"{API_URL_ENDPOINT}Booking/", content))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -150,7 +177,7 @@ namespace BadmintonReservationWebApp.Controllers
                 {
                     var json = JsonConvert.SerializeObject(updateBookingRequest);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    using (var response = await httpClient.PatchAsync($"{API_URL_ENDPOINT}{id}", content))
+                    using (var response = await httpClient.PatchAsync($"{API_URL_ENDPOINT}Booking/{id}", content))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -178,7 +205,7 @@ namespace BadmintonReservationWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    HttpResponseMessage response = await httpClient.DeleteAsync($"{API_URL_ENDPOINT}{id}");
+                    HttpResponseMessage response = await httpClient.DeleteAsync($"{API_URL_ENDPOINT}Booking/{id}");
                     if (response.IsSuccessStatusCode)
                     {
                         return NoContent();
