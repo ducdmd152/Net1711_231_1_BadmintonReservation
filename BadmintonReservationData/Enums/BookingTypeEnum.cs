@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadmintonReservationData.Enum
+namespace BadmintonReservationData.Enums
 {
     public enum BookingTypeEnum
     {
-       Normally = 1, Monthly = 2, Hourly = 3       
+        Normally = 1, Monthly = 2, Hourly = 3
     }
 }

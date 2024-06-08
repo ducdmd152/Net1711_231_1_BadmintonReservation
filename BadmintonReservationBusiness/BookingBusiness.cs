@@ -1,6 +1,6 @@
 ﻿using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
-using BadmintonReservationData.Enum;
+using BadmintonReservationData.Enums;
 using System.Linq.Expressions;
 
 namespace BadmintonReservationBusiness
