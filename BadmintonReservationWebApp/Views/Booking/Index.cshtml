@@ -145,6 +145,7 @@
             var today = new Date().toISOString().split('T')[0];
             var newDetail = `
                 <div class="booking-detail" data-index="${bookingDetailIndex}">
+                     <h5>Booking Detail #${bookingDetailIndex + 1}</h5>
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label for="BookingDetails_${bookingDetailIndex}__BookDate">Book Date</label>
@@ -154,7 +155,7 @@
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label for="BookingDetails_${bookingDetailIndex}__FrameId">Frame</label>
-                            <select class="form-control frame-dropdown" name="BookingDetails[${bookingDetailIndex}].FrameId" data_index="${bookingDetailIndex}">
+                                    <select class="form-control frame-dropdown" name="BookingDetails[${bookingDetailIndex}].FrameId" onchange="loadPrice(this)" data_index="${bookingDetailIndex}">
                                 <!-- Frames will be populated by JavaScript -->
                             </select>
                         </div>
@@ -163,6 +164,7 @@
                             <input type="number" class="form-control" name="BookingDetails[${bookingDetailIndex}].Price" step="1000" min="0" />
                         </div>
                     </div>
+                    <hr class="m-2"/>
                 </div>`;
             $('#bookingDetailsContainer').append(newDetail);
             $(`input[name="BookingDetails[${bookingDetailIndex}].BookDate"]`).val(today);
@@ -170,6 +172,7 @@
             bookingDetailIndex++;
         }
 
+        var frameList = [];
         function loadFrames(input) {
             var bookingDate = $(input).val();
             var index = $(input).closest('.booking-detail').attr('data-index');
@@ -179,6 +182,7 @@
                 url: '@Url.Action("GetFrameAvailable", "Booking")',
                 type: 'GET',
                 success: function (frames) {
+                    frameList = frames;
                     frameDropdown.empty();
                     $.each(frames, function (i, frame) {
                         frameDropdown.append($('<option>', {
@@ -186,11 +190,26 @@
                             text: `${frame.court.name} - ${frame.timeFrom} - ${frame.timeTo}`
                         }));
                     });
+                    frameDropdown.trigger('change');
                 },
                 error: function (error) {
                     console.error('Error fetching frames:', error);
                 }
             });
+        }
+
+
+        function loadPrice(frameDropdown) {
+            var frameId = $(frameDropdown).val();
+            var index = $(frameDropdown).attr('data_index');
+
+            // Find the frame with the selected ID from the global frameList
+            var selectedFrame = frameList.find(frame => frame.id == frameId);
+
+            // Check if a valid frame was found and then update the price
+            if (selectedFrame) {
+                $('input[name="BookingDetails[' + index + '].Price"]').val(selectedFrame.price);
+            }
         }
 
         function edit(id) {
