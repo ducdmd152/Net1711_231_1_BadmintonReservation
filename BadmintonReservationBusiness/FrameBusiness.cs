@@ -47,8 +47,8 @@ public class FrameBusiness
                 var response = new FrameResponseDTO
                 {
                     Id = frame.Id,
-                    TimeFrom = frame.TimeFrom.TimeOfDay,
-                    TimeTo = frame.TimeTo.TimeOfDay,
+                    //TimeFrom = frame.TimeFrom.TimeOfDay,
+                    //TimeTo = frame.TimeTo.TimeOfDay,
                     Price = frame.Price,
                     Status = frame.Status,
                     CourtId = frame.CourtId
@@ -70,8 +70,8 @@ public class FrameBusiness
             var baseDate = DateTime.Today;
             var frame = new Frame()
             {
-                TimeFrom = baseDate.Add(createFrameRequestDto.TimeFrom),
-                TimeTo = baseDate.Add(createFrameRequestDto.TimeTo),
+                //TimeFrom = baseDate.Add(createFrameRequestDto.TimeFrom),
+                //TimeTo = baseDate.Add(createFrameRequestDto.TimeTo),
                 Status = createFrameRequestDto.Status,
                 Price = createFrameRequestDto.Price,
                 CourtId = createFrameRequestDto.CourtId
@@ -100,8 +100,8 @@ public class FrameBusiness
                 return new BusinessResult(400, "No frame data");
             }
             var baseDate = DateTime.Today;
-            frame.TimeFrom = baseDate.Add(updateFrameRequestDto.TimeFrom);
-            frame.TimeTo = baseDate.Add(updateFrameRequestDto.TimeTo);
+            //frame.TimeFrom = baseDate.Add(updateFrameRequestDto.TimeFrom);
+            //frame.TimeTo = baseDate.Add(updateFrameRequestDto.TimeTo);
             frame.Status = updateFrameRequestDto.Status;
             frame.Price = updateFrameRequestDto.Price;
             frame.CourtId = updateFrameRequestDto.CourtId;
@@ -140,4 +140,28 @@ public class FrameBusiness
             return new BusinessResult(500, ex.Message);
         }
     }
+    
+     public async Task<IBusinessResult> GetAllFrameAvailableOfCourtForDate(int id, DateTime bookingDate)
+        {
+            try
+            {
+                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableOfCourtForDate(id);
+                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
+
+                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
+                
+                if (availableFrameForBookingDate == null)
+                {
+                    return new BusinessResult(400, "No frame data");
+                }
+                else
+                {
+                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
 }

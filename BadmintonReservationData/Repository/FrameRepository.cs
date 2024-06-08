@@ -1,18 +1,35 @@
-using BadmintonReservationData.Base;
+﻿using BadmintonReservationData.Base;
+using BadmintonReservationData.Enums;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BadmintonReservationData.Repository;
-
-public class FrameRepository : GenericRepository<Frame>
+namespace BadmintonReservationData.Repository
 {
-    public FrameRepository(UnitOfWork unitOfWork) : base(unitOfWork)
+    public class FrameRepository : GenericRepository<Frame>
     {
-    }
+        public FrameRepository(UnitOfWork unitOfWork) : base(unitOfWork)
+        {            
+        }
 
-    public async Task<List<Frame>> GetAllWithCourtAsync()
-    {
-        return await _dbSet
-            .Include(item => item.Court)
-            .ToListAsync();
+        public async Task<List<Frame>> GetAllFrameAvailableOfCourtForDate(int id)
+        {
+            return await this._dbSet
+                              .IgnoreAutoIncludes()
+                              .Where(item => item.CourtId == id)
+                              .Where(item => item.Status == (int)FrameStatus.Active)
+                              .Include(item => item.Court)
+                              .ToListAsync();
+        }
+        
+        public async Task<List<Frame>> GetAllWithCourtAsync()
+    	{
+	        return await _dbSet
+	            .Include(item => item.Court)
+	            .ToListAsync();
+    	}
     }
 }
