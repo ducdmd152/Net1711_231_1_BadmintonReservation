@@ -10,8 +10,8 @@ namespace BadmintonReservationData
         public int BookingId { get; set; }
         public DateTime BookDate { get; set; }
         public int FrameId { get; set; }
-        public DateTime TimeFrom { get; set; }
-        public DateTime TimeTo { get; set; }
+        public int TimeFrom { get; set; }
+        public int TimeTo { get; set; }
         public double Price { get; set; }
         public int Status { get; set; }
         public DateTime? CheckinTime { get; set; }
