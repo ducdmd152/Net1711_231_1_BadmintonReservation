@@ -38,13 +38,21 @@ namespace BadmintonReservationWebAPI.Controllers
             return GenerateActionResult(result);
         }
 
-        [HttpPatch]
+        [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingRequestDTO updateRequest)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePutBookingRequestDTO updateRequest)
         {
             var result = await _business.UpdateBookingAsync(id, updateRequest);
             return GenerateActionResult(result);
         }
+
+        [HttpPatch]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateByPatch(int id, [FromBody] UpdatePatchBookingRequestDTO updateRequest)
+        {
+            var result = await _business.UpdateByPatchBookingAsync(id, updateRequest);
+            return GenerateActionResult(result);
+        }        
 
         [HttpDelete]
         [Route("{id}")]

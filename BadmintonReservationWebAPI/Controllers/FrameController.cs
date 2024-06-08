@@ -17,17 +17,17 @@ namespace BadmintonReservationWebAPI.Controllers
 
         [HttpGet]
         [Route("court/{id}/available")]
-        public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id)
+        public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id, [FromQuery] DateTime bookingDate)
         {
-            var result = await _business.GetAllFrameAvailableOfCourtForDate(id, DateTime.Now);
+            var result = await _business.GetAllFrameAvailableOfCourtForDate(id, bookingDate);
             return GenerateActionResult(result);
         }
 
         [HttpGet]
         [Route("available")]
-        public async Task<IActionResult> GetAllFrameAvailableOfForDate()
+        public async Task<IActionResult> GetAllFrameAvailableOfForDate([FromQuery] DateTime bookingDate)
         {
-            var result = await _business.GetAllFrameAvailableForDate(DateTime.Now);
+            var result = await _business.GetAllFrameAvailableForDate(bookingDate);
             return GenerateActionResult(result);
         }
 

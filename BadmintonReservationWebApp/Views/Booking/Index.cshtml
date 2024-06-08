@@ -119,6 +119,7 @@
             $("#topUpModalContent").html("");
             $("#topUpModalLabel").html("Add New Booking");
             $('#topUpModal').on('hidden.bs.modal', function (e) {
+                frameList = [];
                 bookingDetailIndex = 0;
             });
 
@@ -181,13 +182,16 @@
             $.ajax({
                 url: '@Url.Action("GetFrameAvailable", "Booking")',
                 type: 'GET',
+                data: { bookingDate: bookingDate },
                 success: function (frames) {
-                    frameList = frames;
+                    frameList[index] = frames;
                     frameDropdown.empty();
                     $.each(frames, function (i, frame) {
+                        let timeFrom = convertIntTime(frame.timeFrom); 
+                        let timeTo = convertIntTime(frame.timeTo);
                         frameDropdown.append($('<option>', {
                             value: frame.id,
-                            text: `${frame.court.name} - ${frame.timeFrom} - ${frame.timeTo}`
+                            text: `${frame.court.name} - ${timeFrom} - ${timeTo}`
                         }));
                     });
                     frameDropdown.trigger('change');
@@ -204,7 +208,7 @@
             var index = $(frameDropdown).attr('data_index');
 
             // Find the frame with the selected ID from the global frameList
-            var selectedFrame = frameList.find(frame => frame.id == frameId);
+            var selectedFrame = frameList[index].find(frame => frame.id == frameId);
 
             // Check if a valid frame was found and then update the price
             if (selectedFrame) {
@@ -258,8 +262,8 @@
 
             bookingDetails.forEach(function (bookingDetail) {
                 var bookDate = new Date(bookingDetail.bookDate).toLocaleDateString();
-                var timeFrom = new Date(bookingDetail.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                var timeTo = new Date(bookingDetail.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                var timeFrom = convertIntTime(bookingDetail.timeFrom);
+                var timeTo = convertIntTime(bookingDetail.timeTo);
                 var courtName = bookingDetail.frame.court.name;
 
                 var rowHtml = '<p>';
@@ -296,40 +300,56 @@
             return isoDateTime;
         }
 
+        function convertIntTime(hhmm) {
+            // Pad the number to ensure it is 4 digits
+            let timeString = hhmm.toString().padStart(4, '0');
+
+            // Extract hours and minutes
+            let hours = timeString.slice(0, 2);
+            let minutes = timeString.slice(2);
+
+            // Combine them in hh:mm format
+            return `${hours}:${minutes}`;
+        }
+
 
         function create() {
             var bookingData = {
+                CustomerId: $('#CustomerId').val(),
                 BookingTypeId: $('#BookingTypeId').val(),
                 Status: $('#Status').val(),
-                PaymentStatus: $('#PaymentStatus').val(),
-                PromotionAmount: $('#PromotionAmount').val(),
                 PaymentType: $('#PaymentType').val(),
-                CustomerId: $('#CustomerId').val(),
+                PaymentStatus: $('#PaymentStatus').val(),
+                PromotionAmount: $('#PromotionAmount').val(),                               
                 BookingDetails: []
             };
 
             $('.booking-detail').each(function (index, element) {
+                var frameId = $(element).find('[name^="BookingDetails"]').filter('[name$="FrameId"]').val();
+                var selectedFrame = frameList[index].find(frame => frame.id == frameId);
+                                
                 var detail = {
+                    Id: 0,
                     BookDate: $(element).find('[name^="BookingDetails"]').filter('[name$="BookDate"]').val(),
-                    FrameId: $(element).find('[name^="BookingDetails"]').filter('[name$="FrameId"]').val(),
+                    FrameId: frameId,
+                    TimeFrom: selectedFrame.timeFrom,
+                    TimeTo: selectedFrame.timeTo,
                     Price: $(element).find('[name^="BookingDetails"]').filter('[name$="Price"]').val()
                 };
                 bookingData.BookingDetails.push(detail);
             });
 
-            console.log(data);
+            console.log(bookingData);
 
             $.ajax({
                 type: 'POST',
                 url: '@Url.Action("Create", "Booking")',
                 contentType: 'application/json;charset=utf-8',
                 dataType: "json",
-                data: JSON.stringify(data),
+                data: JSON.stringify(bookingData),
                 success: function (result) {
-                    if (result.status >= 1) {
-                        $('#topUpModal').modal('hide');
-                        loadData();
-                    }
+                    $('#topUpModal').modal('hide');
+                    loadData();
                     alert("Created new booking sucessfully!");
                 },
                 error: function (xhr, error) {
@@ -340,29 +360,39 @@
         }
 
         function update(id) {
-            var data = {                
-                bookingTypeId: $("#BookingTypeId").val(),
-                status: $("#Status").val(),
-                paymentStatus: null,
-                promotionAmount: $("#PromotionAmount").val(),
-                paymentType: $("#PaymentType").val(),
-                customerId: $("#CustomerId").val(),
+            var bookingData = {
+                CustomerId: $('#CustomerId').val(),
+                BookingTypeId: $('#BookingTypeId').val(),
+                Status: $('#Status').val(),
+                PaymentType: $('#PaymentType').val(),
+                PaymentStatus: $('#PaymentStatus').val(),
+                PromotionAmount: $('#PromotionAmount').val(),
+                BookingDetails: []
             };
 
-            console.log(data);
+            $('.booking-detail').each(function (index, element) {
+                var detail = {
+                    Id: $(`#BookingDetails_${index}__Id`).val(),
+                    BookDate: $(`#BookingDetails_${index}__BookDate`).val(),
+                    FrameId: $(`#BookingDetails_${index}__FrameId`).val(),
+                    TimeFrom: $(`#BookingDetails_${index}__TimeFrom`).val(),
+                    TimeTo: $(`#BookingDetails_${index}__TimeTo`).val(),
+                    Price: $(`#BookingDetails_${index}__Price`).val(),
+                };
+                console.log(detail.Price);
+                bookingData.BookingDetails.push(detail);
+            });
 
             $.ajax({
-                type: 'PATCH',
+                type: 'PUT',
                 url: '@Url.Action("Update", "Booking")' + '/' + id,
                 contentType: 'application/json;charset=utf-8',
                 dataType: "json",
-                data: JSON.stringify(data),
+                data: JSON.stringify(bookingData),
                 success: function (result) {
-                    if (result.status >= 1) {
-                        $('#topUpModal').modal('hide');
-                        loadData();
-                    }
-                    alert(`Updated booking id:${id} sucessfully!`);
+                    $('#topUpModal').modal('hide');
+                    loadData();
+                    alert(`Updated booking id:${id} successfully!`);
                 },
                 error: function (xhr, error) {
                     console.log(xhr);
