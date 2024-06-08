@@ -21,6 +21,7 @@ namespace BadmintonReservationData.Repository
                               .IgnoreAutoIncludes()
                               .Where(item => item.CourtId == id)
                               .Where(item => item.Status == (int)FrameStatus.Active)
+                              .Include(item => item.Court)
                               .ToListAsync();
         }
     }
