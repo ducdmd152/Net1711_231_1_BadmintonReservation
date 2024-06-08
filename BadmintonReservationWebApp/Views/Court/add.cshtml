@@ -17,10 +17,10 @@
 <div class="form-group row">
     <div class="col-md-6">
         <label for="1">Name</label>
-        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @type= "text"} })
     </div>
     <div class="col-md-6">
-        <label for="1">Name</label>
+        <label for="1">Status</label>
         @Html.EditorFor(model => model.Status, new { htmlAttributes = new { @class = "form-control" } })
     </div>
     <div class="col-md-6">
