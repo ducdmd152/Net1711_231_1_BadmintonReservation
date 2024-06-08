@@ -34,14 +34,6 @@ public class FrameController : ControllerBase
     }
     
     [HttpGet]
-    [Route("court/{id}/available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id, [FromQuery] DateTime bookingDate)
-    {
-        var result = await _business.GetAllFrameAvailableOfCourtForDate(id, bookingDate);
-        return GenerateActionResult(result);
-    }
-    
-    [HttpGet]
     [Route("GetById/{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -59,13 +51,7 @@ public class FrameController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfForDate([FromQuery] DateTime bookingDate)
-    {
-        var result = await _business.GetAllFrameAvailableForDate(bookingDate);
-        return GenerateActionResult(result);
-    }
+    
     
     [HttpPost]
     [Route("Create")]
@@ -120,14 +106,6 @@ public class FrameController : ControllerBase
                 return StatusCode(500, "An internal server error occurred. Please try again later.");
         }
     }
-    
-	[HttpGet]
-    [Route("court/{id}/available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id)
-    {
-            var result = await _business.GetAllFrameAvailableOfCourtForDate(id, DateTime.Now);
-            return GenerateActionResult(result);
-    }
 
     private IActionResult GenerateActionResult(IBusinessResult result)
     {
@@ -148,10 +126,17 @@ public class FrameController : ControllerBase
 
     [HttpGet]
     [Route("available")]
-    public async Task<IActionResult> GetAllFrameAvailableOfForDate()
+    public async Task<IActionResult> GetAllFrameAvailableForDate([FromQuery] DateTime bookingDate)
     {
-        var result = await _business.GetAllFrameAvailableForDate(DateTime.Now);
+        var result = await _business.GetAllFrameAvailableForDate(bookingDate);
         return GenerateActionResult(result);
     }
 
+    [HttpGet]
+    [Route("court/{id}/available")]
+    public async Task<IActionResult> GetAllFrameAvailableOfCourtForDate(int id, [FromQuery] DateTime bookingDate)
+    {
+        var result = await _business.GetAllFrameAvailableOfCourtForDate(id, bookingDate);
+        return GenerateActionResult(result);
+    }
 }
