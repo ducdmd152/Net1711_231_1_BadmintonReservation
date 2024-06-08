@@ -64,8 +64,6 @@ namespace BadmintonReservationBusiness
                 {
                     CustomerId = bookingRequest.CustomerId,
                     BookingTypeId = bookingRequest.BookingTypeId,
-                    BookingDateFrom = bookingRequest.BookingDateFrom,
-                    BookingDateTo = bookingRequest.BookingDateTo,
                     PromotionAmount = bookingRequest.PromotionAmount,
                     PaymentType = bookingRequest.PaymentType,
                     CreatedDate = DateTime.Now,
@@ -153,18 +151,6 @@ namespace BadmintonReservationBusiness
                 if (updateRequest.BookingTypeId.HasValue)
                 {
                     booking.BookingTypeId = updateRequest.BookingTypeId.Value;
-                    booking.UpdatedDate = DateTime.Now;
-                }
-
-                if (updateRequest.BookingDateFrom.HasValue)
-                {
-                    booking.BookingDateFrom = updateRequest.BookingDateFrom.Value;
-                    booking.UpdatedDate = DateTime.Now;
-                }
-
-                if (updateRequest.BookingDateTo.HasValue)
-                {
-                    booking.BookingDateTo = updateRequest.BookingDateTo.Value;
                     booking.UpdatedDate = DateTime.Now;
                 }
 

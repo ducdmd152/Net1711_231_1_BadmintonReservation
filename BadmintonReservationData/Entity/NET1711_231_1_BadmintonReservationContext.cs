@@ -21,7 +21,6 @@ namespace BadmintonReservationData
         public virtual DbSet<BookingType> BookingTypes { get; set; } = null!;
         public virtual DbSet<Company> Companies { get; set; } = null!;
         public virtual DbSet<Court> Courts { get; set; } = null!;
-        public virtual DbSet<CustomFrame> CustomFrames { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<DateType> DateTypes { get; set; } = null!;
         public virtual DbSet<Frame> Frames { get; set; } = null!;
@@ -35,7 +34,7 @@ namespace BadmintonReservationData
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=1234567890;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
             }
         }
 
@@ -69,14 +68,6 @@ namespace BadmintonReservationData
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.BookingDateFrom)
-                    .HasColumnType("datetime")
-                    .HasColumnName("booking_date_from");
-
-                entity.Property(e => e.BookingDateTo)
-                    .HasColumnType("datetime")
-                    .HasColumnName("booking_date_to");
-
                 entity.Property(e => e.BookingTypeId).HasColumnName("booking_type_id");
 
                 entity.Property(e => e.CreatedDate)
@@ -88,6 +79,8 @@ namespace BadmintonReservationData
                 entity.Property(e => e.PaymentId).HasColumnName("payment_id");
 
                 entity.Property(e => e.PaymentType).HasColumnName("payment_type");
+
+                entity.Property(e => e.PaymentStatus).HasColumnName("payment_status");
 
                 entity.Property(e => e.PromotionAmount).HasColumnName("promotion_amount");
 
@@ -147,11 +140,9 @@ namespace BadmintonReservationData
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.TimeFrom)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_from");
 
                 entity.Property(e => e.TimeTo)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_to");
 
                 entity.Property(e => e.UpdatedDate)
@@ -241,45 +232,6 @@ namespace BadmintonReservationData
                     .HasColumnName("updated_date");
             });
 
-            modelBuilder.Entity<CustomFrame>(entity =>
-            {
-                entity.ToTable("custom_frame");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.FixedDateTypeId).HasColumnName("fixed_date_type_id");
-
-                entity.Property(e => e.FrameId).HasColumnName("frame_id");
-
-                entity.Property(e => e.Price).HasColumnName("price");
-
-                entity.Property(e => e.SpecificDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("specific_date");
-
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.Property(e => e.UpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("updated_date");
-
-                entity.HasOne(d => d.FixedDateType)
-                    .WithMany(p => p.CustomFrames)
-                    .HasForeignKey(d => d.FixedDateTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("custom_frame_date_type_FK");
-
-                entity.HasOne(d => d.Frame)
-                    .WithMany(p => p.CustomFrames)
-                    .HasForeignKey(d => d.FrameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("custom_frame_frame_FK");
-            });
-
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable("customer");
@@ -345,11 +297,9 @@ namespace BadmintonReservationData
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.TimeFrom)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_from");
 
                 entity.Property(e => e.TimeTo)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_to");
 
                 entity.Property(e => e.UpdatedDate)

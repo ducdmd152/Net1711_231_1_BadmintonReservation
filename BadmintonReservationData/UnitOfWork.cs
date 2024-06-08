@@ -20,9 +20,13 @@ namespace BadmintonReservationData
         private BookingRepository _bookingRepository;
         private CourtRepository _courtRepository;
         private BookingDetailRepository _bookingDetailRepository;
-        private CustomerFrameRepository _customFramRepository;
+        private CustomFrameRepository _customFramRepository;
+        private FrameRepository _frameRepository;
 
-        public UnitOfWork()
+
+      	private DateTypeRepository _dateTypeRespository;
+      	
+ 	 	public UnitOfWork()
         {
             _context = new NET1711_231_1_BadmintonReservationContext();
         }
@@ -53,12 +57,27 @@ namespace BadmintonReservationData
                 return _courtRepository ??= new CourtRepository(this);
             }
         }
-
-        public CustomerFrameRepository CustomerFrameRepository
+        public FrameRepository FrameRepository
         {
             get
             {
-                return _customFramRepository ??= new CustomerFrameRepository(this);
+                return _frameRepository ??= new FrameRepository(this);
+            }
+        }
+
+        public CustomFrameRepository CustomFrameRepository
+        {
+            get
+            {
+                return _customFramRepository ??= new CustomFrameRepository(this);
+            }
+        }
+
+        public DateTypeRepository DateTypeRepository
+        {
+            get
+            {
+                return _dateTypeRespository ??=new DateTypeRepository(this);
             }
         }
 

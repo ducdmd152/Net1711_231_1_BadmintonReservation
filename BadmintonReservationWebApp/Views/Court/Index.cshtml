@@ -108,13 +108,13 @@
                 dataType: "json",
                 success: function (result) {
                     var html = '';
-                    $.each(result["$values"], function (key, item) {
+                    $.each(result, function (key, item) {
                         //console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
                         html += '<td>' + item.name + '</td>';
                         html += '<td>' + item.status + '</td>';
-                        html += '<td>' + item.createdDate + '</td>';
+                        html += '<td>' + formatDateTime(item.createdDate) + '</td>';
                         html += '<td><a href="#" onclick="return edit(\'' + item.id + '\')">Edit</a> | <a href="#" onclick="delele(\'' + item.id + '\')">Delete</a></td>';
                         html += '</tr>';
                     });
@@ -195,6 +195,13 @@
                     }
                 });
             }
+        }
+
+        function formatDateTime(dateTimeString, format) {
+            var dateTime = new Date(dateTimeString);
+            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+
+            return formattedDateTime;
         }
 
     </script>

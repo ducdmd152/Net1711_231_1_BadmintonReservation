@@ -1,7 +1,11 @@
 ﻿@{
     ViewData["Title"] = "Index";
 }
-
+<style>
+    #topUpModal .modal-dialog {
+        max-width: 60%; /* Adjust this value as needed */
+    }
+</style>
 <div class="row">
     <div class="col-md-10">
         <h2 class="display-8">Booking List</h2>
@@ -36,7 +40,7 @@
 </div>
 
 <div class="modal fade" id="topUpModal" tabindex="-1" aria-labelledby="topUpModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog custom-modal-width">
         <div class="modal-content">
             @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
             {
@@ -113,7 +117,10 @@
 
         function add() {
             $("#topUpModalContent").html("");
-            $("#topUpModalLabel").html("Add New");
+            $("#topUpModalLabel").html("Add New Booking");
+            $('#topUpModal').on('hidden.bs.modal', function (e) {
+                bookingDetailIndex = 0;
+            });
 
             $.ajax({
                 url: '@Url.Action("Add", "Booking")',
@@ -121,13 +128,67 @@
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
-
+                    addBookingDetail();
                     $("#btSave").off("click").on("click", function () {
                         create();
                     });
                 },
                 error: function (message) {
                     alert(message);
+                }
+            });
+        }
+
+        var bookingDetailIndex = 0;
+
+        function addBookingDetail() {
+            var today = new Date().toISOString().split('T')[0];
+            var newDetail = `
+                <div class="booking-detail" data-index="${bookingDetailIndex}">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__BookDate">Book Date</label>
+                            <input type="date" class="form-control" name="BookingDetails[${bookingDetailIndex}].BookDate" onchange="loadFrames(this)" value="${today}/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__FrameId">Frame</label>
+                            <select class="form-control frame-dropdown" name="BookingDetails[${bookingDetailIndex}].FrameId" data_index="${bookingDetailIndex}">
+                                <!-- Frames will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__Price">Price</label>
+                            <input type="number" class="form-control" name="BookingDetails[${bookingDetailIndex}].Price" step="1000" min="0" />
+                        </div>
+                    </div>
+                </div>`;
+            $('#bookingDetailsContainer').append(newDetail);
+            $(`input[name="BookingDetails[${bookingDetailIndex}].BookDate"]`).val(today);
+            loadFrames($(`input[name="BookingDetails[${bookingDetailIndex}].BookDate"]`));
+            bookingDetailIndex++;
+        }
+
+        function loadFrames(input) {
+            var bookingDate = $(input).val();
+            var index = $(input).closest('.booking-detail').attr('data-index');
+            var frameDropdown = $('select[name="BookingDetails[' + index + '].FrameId"]');
+
+            $.ajax({
+                url: '@Url.Action("GetFrameAvailable", "Booking")',
+                type: 'GET',
+                success: function (frames) {
+                    frameDropdown.empty();
+                    $.each(frames, function (i, frame) {
+                        frameDropdown.append($('<option>', {
+                            value: frame.id,
+                            text: `${frame.court.name} - ${frame.timeFrom} - ${frame.timeTo}`
+                        }));
+                    });
+                },
+                error: function (error) {
+                    console.error('Error fetching frames:', error);
                 }
             });
         }
@@ -193,7 +254,7 @@
 
         function formatDateTime(dateTimeString, format) {
             var dateTime = new Date(dateTimeString);
-            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+                var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
 
             return formattedDateTime;
         }
@@ -218,15 +279,24 @@
 
 
         function create() {
-            var data = {
-                bookingTypeId: $("#BookingTypeId").val(),
-                status: $("#Status").val(),
-                promotionAmount: $("#PromotionAmount").val(),
-                paymentType: $("#PaymentType").val(),
-                customerId: $("#CustomerId").val(),
-                bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
-                bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
+            var bookingData = {
+                BookingTypeId: $('#BookingTypeId').val(),
+                Status: $('#Status').val(),
+                PaymentStatus: $('#PaymentStatus').val(),
+                PromotionAmount: $('#PromotionAmount').val(),
+                PaymentType: $('#PaymentType').val(),
+                CustomerId: $('#CustomerId').val(),
+                BookingDetails: []
             };
+
+            $('.booking-detail').each(function (index, element) {
+                var detail = {
+                    BookDate: $(element).find('[name^="BookingDetails"]').filter('[name$="BookDate"]').val(),
+                    FrameId: $(element).find('[name^="BookingDetails"]').filter('[name$="FrameId"]').val(),
+                    Price: $(element).find('[name^="BookingDetails"]').filter('[name$="Price"]').val()
+                };
+                bookingData.BookingDetails.push(detail);
+            });
 
             console.log(data);
 
@@ -258,8 +328,6 @@
                 promotionAmount: $("#PromotionAmount").val(),
                 paymentType: $("#PaymentType").val(),
                 customerId: $("#CustomerId").val(),
-                bookingDateFrom: convertToISODateTime($("#BookingDateFrom").val()),
-                bookingDateTo: convertToISODateTime($("#BookingDateTo").val())
             };
 
             console.log(data);
