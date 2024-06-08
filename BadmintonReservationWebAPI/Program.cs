@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<BookingBusiness>();
+builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<CourtBusiness>();
 builder.Services.AddScoped<PurchasedBusiness>();
 builder.Services.AddScoped<CustomFrameBusiness>();

@@ -18,5 +18,13 @@ namespace BadmintonReservationData
         public int CourtId { get; set; }
 
         public virtual Court Court { get; set; } = null!;
+
+        public override string ToString()
+        {
+            string timeFromFormatted = $"{TimeFrom / 100:00}:{TimeFrom % 100:00}";
+            string timeToFormatted = $"{TimeTo / 100:00}:{TimeTo % 100:00}";
+
+            return $"{Court.Name} - {timeFromFormatted} - {timeToFormatted}";
+        }
     }
 }

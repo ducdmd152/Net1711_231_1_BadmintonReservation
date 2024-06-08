@@ -1,5 +1,6 @@
 ﻿using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Enum;
 using System.Linq.Expressions;
 
 namespace BadmintonReservationBusiness
@@ -64,11 +65,11 @@ namespace BadmintonReservationBusiness
                 {
                     CustomerId = bookingRequest.CustomerId,
                     BookingTypeId = bookingRequest.BookingTypeId,
+                    Status = bookingRequest.Status,
                     PromotionAmount = bookingRequest.PromotionAmount,
                     PaymentType = bookingRequest.PaymentType,
+                    PaymentStatus = bookingRequest.PaymentStatus,
                     CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
-                    Status = bookingRequest.Status, // Initial status
                     BookingDetails = bookingRequest.BookingDetails.Select(d => new BookingDetail
                     {
                         BookDate = d.BookDate,
@@ -82,15 +83,30 @@ namespace BadmintonReservationBusiness
                     Payment = new Payment
                     {
                         Amount = bookingRequest.BookingDetails.Sum(d => d.Price),
-                        Status = 0, // Initial status
+                        Status = bookingRequest.PaymentStatus,
                         CreatedDate = DateTime.Now,
                         UpdatedDate = DateTime.Now
                     }
                 };
 
+                if (bookingRequest.BookingTypeId == (int)BookingTypeEnum.Hourly)
+                {
+                    var customer = this._unitOfWork.CustomerRepository.GetById(bookingRequest.CustomerId);
+                    var requestAmountOfTime = bookingRequest.BookingDetails.Sum(item => (item.TimeTo - item.TimeFrom) / 100 + ((item.TimeTo - item.TimeFrom)%100) / 60);
+                    if (customer.TotalHoursMonthly < requestAmountOfTime)
+                    {
+                        return new BusinessResult(400, "Not enough amount of purchased hours for done this booking!");
+                    }
+                    else
+                    {
+                        customer.TotalHoursMonthly -= requestAmountOfTime;
+                        this._unitOfWork.CustomerRepository.Update(customer);
+                    }
+                }
+
                 await this._unitOfWork.BookingRepository.CreateAsync(booking);
                 await this._unitOfWork.CommitTransactionAsync();
-                return new BusinessResult(201, "Booking created successfully", booking);
+                return new BusinessResult(200, "Booking created successfully", booking);
             }
             catch (Exception ex)
             {
@@ -99,7 +115,57 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> UpdateBookingAsync(int id, UpdateBookingRequestDTO updateRequest)
+        public async Task<IBusinessResult> UpdateBookingAsync(int id, UpdatePutBookingRequestDTO updateRequest)
+        {
+            await this._unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var booking = await this._unitOfWork.BookingRepository.GetByIdWithDetailsAsync(id);
+                if (booking == null)
+                {
+                    return new BusinessResult(404, "Booking not found");
+                }
+
+                booking.CustomerId = updateRequest.CustomerId;
+                booking.BookingTypeId = updateRequest.BookingTypeId;
+                booking.Status = updateRequest.Status;
+                booking.PromotionAmount = updateRequest.PromotionAmount;
+                booking.PaymentType = updateRequest.PaymentType;
+                booking.PaymentStatus = updateRequest.PaymentStatus;
+                booking.UpdatedDate = DateTime.Now;
+
+                foreach (var detail in updateRequest.BookingDetails)
+                {
+                    var bookingDetail = booking.BookingDetails.FirstOrDefault(d => d.Id == detail.Id);
+                    if (bookingDetail != null)
+                    {
+                        bookingDetail.BookDate = detail.BookDate;
+                        bookingDetail.FrameId = detail.FrameId;
+                        bookingDetail.TimeFrom = detail.TimeFrom;
+                        bookingDetail.TimeTo = detail.TimeTo;
+                        bookingDetail.Price = detail.Price;
+                    }
+                    else
+                    {
+                        // Handle if the booking detail does not exist
+                    }
+                }
+
+                booking.UpdatedDate = DateTime.Now;
+                this._unitOfWork.BookingRepository.Update(booking);
+                await this._unitOfWork.CommitTransactionAsync();
+
+                return new BusinessResult(200, "Booking updated successfully", booking);
+            }
+            catch (Exception ex)
+            {
+                this._unitOfWork.RollbackTransaction();
+
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> UpdateByPatchBookingAsync(int id, UpdatePatchBookingRequestDTO updateRequest)
         {
             await this._unitOfWork.BeginTransactionAsync();
             try

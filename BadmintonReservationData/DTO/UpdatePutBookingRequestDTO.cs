@@ -1,6 +1,6 @@
 ﻿namespace BadmintonReservationData.DTOs
 {
-    public class CreateBookingRequestDTO
+    public class UpdatePutBookingRequestDTO
     {
         public int CustomerId { get; set; }
         public int BookingTypeId { get; set; }
@@ -8,7 +8,7 @@
         public int PaymentType { get; set; }
         public int PaymentStatus { get; set; }
         public double PromotionAmount { get; set; }
-        
+
         public List<BookingDetailDTO> BookingDetails { get; set; }
     }
 }

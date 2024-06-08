@@ -29,9 +29,32 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
-            return PartialView("add", new AddBookingModel());
+            try
+            {
+                var customers = new List<Customer>();
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Customer"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            customers = JsonConvert.DeserializeObject<List<Customer>>(content);
+                        }
+                    }
+                }
+
+                return PartialView("add", new AddBookingModel()
+                {
+                    Customers = customers
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         [HttpGet]
@@ -87,14 +110,14 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Frame>> GetFrameAvailable()
+        public async Task<List<Frame>> GetFrameAvailable([FromQuery] DateTime bookingDate)
         {
             try
             {
                 var result = new List<Frame>();
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Frame/available/"))
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Frame/available?bookingDate={bookingDate.ToString("yyyy-MM-dd")}"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -139,7 +162,7 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<Booking> Create(int id, [FromBody] Booking booking)
+        public async Task<Booking> Create(int id, [FromBody] CreateBookingRequestDTO booking)
         {
             try
             {
@@ -166,10 +189,41 @@ namespace BadmintonReservationWebApp.Controllers
             {
                 throw new Exception($"Internal server error: {ex.Message}");
             }
+        }        
+
+        [HttpPut]
+        public async Task<Booking> Update(int id, [FromBody] UpdatePutBookingRequestDTO updateBookingRequest)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(updateBookingRequest);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    using (var response = await httpClient.PutAsync($"{API_URL_ENDPOINT}Booking/{id}", content))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var updatedBooking = JsonConvert.DeserializeObject<Booking>(responseContent);
+                            return updatedBooking;
+                        }
+                        else
+                        {
+                            throw new Exception($"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Internal server error: {ex.Message}");
+            }
         }
 
+
         [HttpPatch]
-        public async Task<Booking> Update(int id, [FromBody] UpdateBookingRequestDTO updateBookingRequest)
+        public async Task<Booking> UpdateByPatch(int id, [FromBody] UpdatePutBookingRequestDTO updateBookingRequest)
         {
             try
             {

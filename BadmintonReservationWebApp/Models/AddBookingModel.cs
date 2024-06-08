@@ -10,7 +10,8 @@ namespace BadmintonReservationWebApp.Models
         public int PaymentStatus { get; set; }
         public double PromotionAmount { get; set; }
         public int PaymentType { get; set; }
-        public int CustomerId { get; set; } = 1;  // Default to 1 for example
+        public int CustomerId { get; set; }
+        public List<Customer> Customers { get; set; }
         public List<BookingDetailDTO> BookingDetails { get; set; } = new List<BookingDetailDTO>();
     }
 }
