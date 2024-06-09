@@ -151,7 +151,7 @@
             @for (var i = 0; i < bookingDetails.Count; i++)
             {
                 <tr>
-                    <th scope="row">@i</th>
+                    <th scope="row">@(i+1)</th>
                     <td>@FormatDate(bookingDetails[i].BookDate)</td>
                     <td>@bookingDetails[i].Frame.Court.Name</td>
                     <td>@ConvertIntTime(bookingDetails[i].Frame.TimeFrom) - @ConvertIntTime(bookingDetails[i].Frame.TimeTo)</td>
