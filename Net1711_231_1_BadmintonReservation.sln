@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationBusines
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationWebAPI", "BadmintonReservationWebAPI\BadmintonReservationWebAPI.csproj", "{30378FD5-A31F-4A81-B9BB-F97567326716}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BadmintonReservationWebApp", "BadmintonReservationWebApp\BadmintonReservationWebApp.csproj", "{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadmintonReservationWebApp", "BadmintonReservationWebApp\BadmintonReservationWebApp.csproj", "{148C14B2-D30E-4FD6-8BFF-A79E69F8DC41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
