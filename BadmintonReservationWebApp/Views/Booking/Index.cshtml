@@ -27,7 +27,7 @@
                     <th class="card-title text-center">Status</th>
                     <th class="card-title text-center">Type</th>                            
                     <th class="card-title text-center">Details</th>
-                    <th class="card-title text-center">Promotion Amount</th>
+                    <th class="card-title text-center">Promotion</th>
                     <th class="card-title text-center">Payment</th>
                     <th class="card-title text-center">Last Updated</th>
                     <th class="card-title text-center"></th>
@@ -105,10 +105,10 @@
                         html += '<td>' + statusMap[item.status] + '</td>';
                         html += '<td>' + bookingTypeMap[item.bookingTypeId] + '</td>';
                         html += '<td>' + generateBookingDetailsHTML(item.bookingDetails) + '</td>';
-                        html += '<td>' + item.promotionAmount + '</td>';
+                        html += '<td>' + item.promotionAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) + '</td>';
                         html += '<td>' + paymentTypeMap[item.paymentType] + ' | ' + paymentStatusMap[item.paymentStatus] + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
@@ -405,6 +405,11 @@
                     alert(`Something went wrong!`);
                 }
             });
+        }
+
+        function redirectToReport(id) {
+            var url = '/Booking/report/' + id;
+            window.location.href = url;
         }
     
 
