@@ -84,6 +84,32 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Report(int id)
+        {
+            try
+            {
+                Booking result = null;
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Booking/{id}"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<Booking>(content);
+                        }
+                    }
+                }
+
+                return View("report", result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpGet]
         public async Task<List<Booking>> GetAll()
         {
             try
