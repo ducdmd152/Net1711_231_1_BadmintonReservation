@@ -24,6 +24,7 @@ namespace BadmintonReservationData
         private CustomFrameRepository _customFramRepository;
         private FrameRepository _frameRepository;
         private CustomerRepository _customerRepository;
+        private PaymentRepository _paymentRepository;
 
 
       	private DateTypeRepository _dateTypeRespository;
@@ -89,6 +90,14 @@ namespace BadmintonReservationData
             get
             {
                 return _customFramRepository ??= new CustomFrameRepository(this);
+            }
+        }
+
+        public PaymentRepository PaymentRepository
+        {
+            get
+            {
+                return _paymentRepository ??= new PaymentRepository(this);
             }
         }
 

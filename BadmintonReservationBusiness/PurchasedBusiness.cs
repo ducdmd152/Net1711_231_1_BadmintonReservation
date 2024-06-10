@@ -83,13 +83,18 @@ namespace BadmintonReservationBusiness
             await this.unitOfWork.BeginTransactionAsync();
             try
             {
+                var payment = new Payment
+                {
+                    Amount = createPurchasedRequest.AmountHour * 90000,
+                    Status = 1,
+                };
+
                 var purchased = new PurchasedHoursMonthly
                 {
                     AmountHour = createPurchasedRequest.AmountHour,
                     Status = createPurchasedRequest.Status,
                     CustomerId = createPurchasedRequest.CustomerId,
-                    PaymentId = createPurchasedRequest.PaymentId,
-                    CreatedDate = DateTime.Now,
+                    Payment = payment,
                 };
 
                 await this.unitOfWork.PurchasedRepository.CreateAsync(purchased);
@@ -115,11 +120,20 @@ namespace BadmintonReservationBusiness
                     return new BusinessResult(-1, "No purchased data");
                 }
 
+                // Cập nhật các thuộc tính của PurchasedHoursMonthly
                 purchased.AmountHour = updatePurchasedRequest.AmountHour;
                 purchased.Status = updatePurchasedRequest.Status;
                 purchased.CustomerId = updatePurchasedRequest.CustomerId;
-                purchased.PaymentId = updatePurchasedRequest.PaymentId;
                 purchased.UpdatedDate = DateTime.Now;
+
+                // Truy xuất và cập nhật Payment nếu cần thiết
+                var payment = await this.unitOfWork.PaymentRepository.GetByIdAsync(purchased.PaymentId);
+                if (payment != null)
+                {
+                    payment.Amount = updatePurchasedRequest.AmountHour * 90000;
+                    payment.Status = 1; // Cập nhật trạng thái của payment nếu cần
+                    this.unitOfWork.PaymentRepository.Update(payment);
+                }
 
                 this.unitOfWork.PurchasedRepository.Update(purchased);
                 await this.unitOfWork.CommitTransactionAsync();
@@ -132,6 +146,8 @@ namespace BadmintonReservationBusiness
                 return new BusinessResult(-4, ex.Message);
             }
         }
+
+
 
         public async Task<IBusinessResult> RemovePurchased(int id)
         {

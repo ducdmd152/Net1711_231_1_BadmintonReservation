@@ -82,7 +82,7 @@
                         html += '<td>' + item.customer.fullName + '</td>';
                         html += '<td>' + item.payment.amount + ' VND</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
@@ -113,6 +113,11 @@
                     alert(message);
                 }
             });
+        }
+
+        function redirectToReport(id) {
+            var url = '/Purchased/report/' + id;
+            window.location.href = url;
         }
 
         function edit(id) {

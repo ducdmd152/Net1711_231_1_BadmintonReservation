@@ -1,0 +1,28 @@
+﻿<div class="container">
+    <h3 class="header-text">Purchased Report</h3>
+    <div class="header-line"></div>
+
+    @if (Model != null)
+    {
+        <dl class="row details mt-3">
+            <div class="col-md-6 row">
+                <dt class="col-sm-4">Amount Hour:</dt>
+                <dd class="col-sm-8">@Model.AmountHour</dd>
+
+                <dt class="col-sm-4">Status:</dt>
+                <dd class="col-sm-8">@Model.Status == 1 ? "Active" : "Inactive"</dd>
+            </div>
+            <div class="col-md-6 row">
+                <dt class="col-sm-4">Customer ID:</dt>
+                <dd class="col-sm-8">@Model.CustomerId</dd>
+
+                <dt class="col-sm-4">Payment Amount:</dt>
+                <dd class="col-sm-8">@Model.Payment?.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</dd>
+            </div>
+        </dl>
+    }
+    else
+    {
+        <p>No data available.</p>
+    }
+</div>

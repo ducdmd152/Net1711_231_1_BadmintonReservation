@@ -151,11 +151,11 @@
             @for (var i = 0; i < bookingDetails.Count; i++)
             {
                 <tr>
-                    <th scope="row">@i</th>
+                    <th scope="row">@(i+1)</th>
                     <td>@FormatDate(bookingDetails[i].BookDate)</td>
                     <td>@bookingDetails[i].Frame.Court.Name</td>
                     <td>@ConvertIntTime(bookingDetails[i].Frame.TimeFrom) - @ConvertIntTime(bookingDetails[i].Frame.TimeTo)</td>
-                    <td>@bookingDetails[i].Frame.Price.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+                    <td>@bookingDetails[i].Price.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
                 </tr>
             }
             <tr style="font-weight: 600;">
@@ -171,7 +171,7 @@
             <tr style="font-weight: 600;">
                 <td colspan="3"></td>
                 <td colspan="1">Total for Payment</td>
-                <td colspan="1">@lastTotal</td>
+                <td colspan="1">@lastTotal.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
             </tr>
         </tbody>
     </table>
