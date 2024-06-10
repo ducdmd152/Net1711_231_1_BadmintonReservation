@@ -22,5 +22,10 @@ namespace BadmintonReservationData.Repository
                 .Include(x => x.Payment)
                 .ToList();
         }
+
+        public PurchasedHoursMonthly GetWithCustomerById(int id)
+        {
+            return this._dbSet.Include(x => x.Customer).Include(x => x.Payment).Where(x => x.Id == id).FirstOrDefault();
+        }
     }
 }

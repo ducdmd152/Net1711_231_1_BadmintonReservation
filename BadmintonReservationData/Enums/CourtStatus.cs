@@ -8,6 +8,6 @@ namespace BadmintonReservationData.Enums
 {
     public enum CourtStatus
     {
-        Active = 1, Inactive = 2
+        Active = 1, Inactive = 2, Delete = 3,
     }
 }

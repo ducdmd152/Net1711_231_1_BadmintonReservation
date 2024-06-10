@@ -234,4 +234,9 @@ public class FrameBusiness
             return new BusinessResult(500, ex.Message);
         }
     }
+    public List<Frame> GetAllFrameWithCourtId(int id)
+    {
+        var result = this.unitOfWork.FrameRepository.GetAllWithCourtId(id);
+        return result;
+    }
 }

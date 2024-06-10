@@ -1,28 +1,112 @@
-﻿<div class="container">
-    <h3 class="header-text">Purchased Report</h3>
+﻿@model BadmintonReservationData.PurchasedHoursMonthly
+
+@{
+    if (Model == null)
+    {
+        <h1>No data available</h1>
+        return;
+    }
+
+    ViewData["Title"] = "Purchased Report #" + Model.Id;
+
+    var statusMap = new Dictionary<int, string>
+    {
+        { 1, "Active" },
+        { 2, "InActive" }
+    };
+
+    var statusBadgeMap = new Dictionary<int, string>
+    {
+        { 1, "bg-success" }, // Active
+        { 2, "bg-danger" }   // InActive
+    };
+
+    string FormatDate(DateTime date)
+    {
+        return date.ToString("dddd, dd-MM-yyyy");
+    }
+
+    string FormatDateTime(DateTime date)
+    {
+        return date.ToString("dddd, dd-MM-yyyy HH:mm");
+    }
+
+    string FormatPriceVND(double price)
+    {
+        return price.ToString("N0") + " VND";
+    }
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .header-text {
+        color: #0188A6;
+        font-weight: 600;
+    }
+
+    .header-line {
+        background-color: #00a6BD4E;
+        padding: 20px;
+        color: white;
+        font-size: 24px;
+    }
+
+    .header-text {
+        display: flex;
+        align-items: center;
+    }
+
+        .header-text .badge {
+            margin-left: 10px;
+        }
+
+    .details, .details dt, .details dd {
+        font-size: 18px;
+    }
+
+        .details dt {
+            font-weight: bold;
+        }
+
+        .details dd {
+            margin: 0 0 10px;
+        }
+
+    .table {
+        margin-top: 20px;
+    }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+</style>
+
+<div class="container">
+    <h3 class="header-text">Purchased Report #@Model.Id <span class="badge @statusBadgeMap[@Model.Status]" style="font-size: 14px;">@statusMap[@Model.Status]</span></h3>
     <div class="header-line"></div>
 
-    @if (Model != null)
-    {
-        <dl class="row details mt-3">
-            <div class="col-md-6 row">
-                <dt class="col-sm-4">Amount Hour:</dt>
-                <dd class="col-sm-8">@Model.AmountHour</dd>
+    <dl class="row details mt-3">
+        <div class="col-md-6 row">
+            <dt class="col-sm-4">Amount Hour:</dt>
+            <dd class="col-sm-8">@Model.AmountHour</dd>
 
-                <dt class="col-sm-4">Status:</dt>
-                <dd class="col-sm-8">@Model.Status == 1 ? "Active" : "Inactive"</dd>
-            </div>
-            <div class="col-md-6 row">
-                <dt class="col-sm-4">Customer ID:</dt>
-                <dd class="col-sm-8">@Model.CustomerId</dd>
+            <dt class="col-sm-4">Status:</dt>
+            <dd class="col-sm-8">@statusMap[@Model.Status]</dd>
 
-                <dt class="col-sm-4">Payment Amount:</dt>
-                <dd class="col-sm-8">@Model.Payment?.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</dd>
-            </div>
-        </dl>
-    }
-    else
-    {
-        <p>No data available.</p>
-    }
+            <dt class="col-sm-4">Customer Name:</dt>
+            <dd class="col-sm-8">@Model.Customer.FullName</dd>
+        </div>
+        <div class="col-md-6 row">
+            <dt class="col-sm-4">Payment Amount:</dt>
+            <dd class="col-sm-8">@FormatPriceVND(@Model.Payment?.Amount ?? 0)</dd>
+            <dt class="col-sm-4">Purchased Created:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.CreatedDate)</dd>
+            <dt class="col-sm-4">Last Updated At:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.UpdatedDate)</dd>
+        </div>
+    </dl>
 </div>

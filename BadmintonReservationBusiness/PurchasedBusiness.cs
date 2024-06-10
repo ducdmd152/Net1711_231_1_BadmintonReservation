@@ -61,7 +61,7 @@ namespace BadmintonReservationBusiness
         {
             try
             {
-                var purchased = this.unitOfWork.PurchasedRepository.GetById(id);
+                var purchased = this.unitOfWork.PurchasedRepository.GetWithCustomerById(id);
 
                 if (purchased == null)
                 {
@@ -69,6 +69,13 @@ namespace BadmintonReservationBusiness
                 }
                 else
                 {
+                    var cus = purchased.Customer;
+                    cus.PurchasedHoursMonthlies = null;
+                    var pay = purchased.Payment;
+                    pay.PurchasedHoursMonthlies = null;
+
+                    purchased.Customer = cus;
+                    purchased.Payment = pay;
                     return new BusinessResult(200, "Get purchased success", purchased);
                 }
             }

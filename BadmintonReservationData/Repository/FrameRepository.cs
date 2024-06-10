@@ -80,5 +80,15 @@ namespace BadmintonReservationData.Repository
                     )
                 );
         }
+
+        public List<Frame> GetAllWithCourtId(int courtId)
+        {
+            return this._dbSet.Where(x => x.CourtId == courtId).ToList();
+        }
+
+        public List<Frame> GetListByCourtId(int id)
+        {
+            return this._dbSet.Where(x => x.CourtId == id).ToList();
+        }
     }
 }

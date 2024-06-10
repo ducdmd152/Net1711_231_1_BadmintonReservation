@@ -68,12 +68,15 @@
         });
 
         function loadData() {
+            var spin = document.getElementById('spinner-overlay');
+            spin.classList.remove('invisible');
             $.ajax({
                 url: '@Url.Action("GetAll", "Booking")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 success: function (result) {
+                    spin.classList.add('invisible');
                     const statusMap = {
                         1: 'Pending',
                         2: 'Successful',
@@ -116,6 +119,7 @@
                 error: function (xhr, error) {
                     alert(xhr.statusText);
                     alert(`Something went wrong!`);
+                    spin.classList.add('invisible');
                 }
             });
         }

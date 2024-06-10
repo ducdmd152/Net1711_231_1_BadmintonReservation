@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-md-10">
-        <h3 class="display-8">TopUp List</h3>
+        <h3 class="display-8">Court List</h3>
     </div>
     <div class="col-md-2 text-end">
         <button type="button" class="btn btn-primary" onclick="add();">
@@ -23,8 +23,8 @@
             <thead>
                 <tr class="card-header">
                     <th class="card-title text-center">Code</th>
-                    <th class="card-title text-center">name</th>
-                    <th class="card-title text-center">status</th>
+                    <th class="card-title text-center">Name</th>
+                    <th class="card-title text-center">Status</th>
                     <th class="card-title text-center">Create Date</th>
                     <th class="card-title text-center"></th>
                 </tr>
@@ -61,66 +61,73 @@
     <script type="text/javascript">
         $(document).ready(function () {
             loadData();
+        });
 
-            $("#btSave").click(function () {
-                var formData = new FormData();
-                formData.append("ID", $("#ID").val());
-                formData.append("TypeCode", $("#TypeCode").val());
-                formData.append("AmountGross", $("#AmountGross").val());
-                formData.append("CurrencyCode", $("#CurrencyCode").val());
-                formData.append("Description", $("#Description").val());
-                formData.append("IsIncluded", $("#IsIncluded").val());
+        function create () {
+            if ($('#frm').valid()) {
 
-                console.log(formData);
+                // Proceed with AJAX request
+                var data = {
+                    name: $("#Name").val(),
+                    status: $("#Status").val()
+                };
 
+                // AJAX request
+                console.log(data);
                 $.ajax({
                     type: 'POST',
-                    url: '@Url.Action("Save", "Home")',
-                    //contentType: 'application/json;charset=utf-8',
-                    //dataType: "json",
-                    processData: false,
-                    contentType: false,
-                    data: formData,
+                    url: '@Url.Action("Create", "Court")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    data: JSON.stringify(data),
                     success: function (result) {
-                        //console.log(result);
-
                         if (result.status >= 1) {
                             $('#topUpModal').modal('hide');
                             loadData();
                         }
-                        alert(result.message);
+                        alert("Created new court successfully!");
                     },
                     error: function (xhr, error) {
-                        //alert(xhr.responseText);
                         console.log(xhr);
+                        alert(`Something went wrong!`);
                     }
                 });
-            });
-
-            ////////
-        });
+            }
+        ////////
+    }
 
         function loadData() {
+
+            var spin = document.getElementById('spinner-overlay');
+            spin.classList.remove('invisible');
+            const statusMap = {
+                1: 'Active',
+                2: 'InActive',
+                3: 'Delete'
+            };
+
             $.ajax({
                 url: '@Url.Action("GetAll", "Court")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 success: function (result) {
+                    spin.classList.add('invisible');
                     var html = '';
                     $.each(result, function (key, item) {
                         //console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
                         html += '<td>' + item.name + '</td>';
-                        html += '<td>' + item.status + '</td>';
+                        html += '<td>' + statusMap[item.status] + '</td>';
                         html += '<td>' + formatDateTime(item.createdDate) + '</td>';
-                        html += '<td><a href="#" onclick="return edit(\'' + item.id + '\')">Edit</a> | <a href="#" onclick="delele(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblTopUpList').html(html);
                 },
                 error: function (xhr, error) {
+                    spin.classList.add('invisible');
                     alert(xhr.statusText);
                 }
             });
@@ -136,6 +143,9 @@
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
+                    $("#btSave").off("click").on("click", function () {
+                        create();
+                    });
                 },
                 error: function (message) {
                     alert(message);
@@ -147,20 +157,17 @@
             $("#topUpModalContent").html("");
             $("#topUpModalLabel").html("Update");
 
-            var formData = new FormData();
-            formData.append("id", id);
 
             $.ajax({
-                url: '@Url.Action("Edit", "Home")',
-                type: "POST",
-                //contentType: 'application/json;charset=utf-8',
-                //dataType: "json",
-                processData: false,
-                contentType: false,
-                data: formData,
+                url: '@Url.Action("Edit", "Court")' + '/' + id,
+                type: "GET",
                 success: function (result) {
                     $("#topUpModalContent").html(result);
                     $('#topUpModal').modal('show');
+
+                    $("#btSave").off("click").on("click", function () {
+                        update(id);
+                    });
                 },
                 error: function (message) {
                     alert(message);
@@ -168,41 +175,75 @@
             });
         }
 
-        function delele(id) {
-            var result = confirm("Are you sure to delete?");
-            if (result) {
-                //alert(id);
-                var formData = new FormData();
-                formData.append("id", id);
+        function update(id) {
+            // Manually trigger validation
+            if ($('#frm').valid()) {
 
+                // Proceed with AJAX request
+                var data = {
+                    id: id,
+                    name: $("#Name").val(),
+                    status: $("#Status").val()
+                };
+
+
+                // AJAX request
+                console.log(data);
                 $.ajax({
-                    url: '@Url.Action("Delete", "Home")',
-                    type: "POST",
-                    //contentType: 'application/json;charset=utf-8',
-                    //dataType: "json",
-                    processData: false,
-                    contentType: false,
-                    data: formData,
+                    type: 'PUT',
+                    url: '@Url.Action("Update", "Court")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    data: JSON.stringify(data),
                     success: function (result) {
                         if (result.status >= 1) {
                             $('#topUpModal').modal('hide');
                             loadData();
                         }
-                        alert(result.message);
+                        alert(`Update court ${id} successfully!`);
                     },
-                    error: function (message) {
-                        alert(message);
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong!`);
                     }
                 });
             }
         }
 
+        function deleteItem(id) {
+            var result = confirm(`Are you sure to delete court ${id}?`);
+            if (result) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Court")' + '/' + id,
+                    type: 'DELETE',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    success: function (result) {
+                        loadData();
+                        alert(`Deleted court  frame ${id} successfully!`);
+                    },
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong!`);
+                    }
+                });
+            }
+        }
+
+        function redirectToReport(id) {
+            var url = '/Court/report/' + id;
+            window.location.href = url;
+        }
+
         function formatDateTime(dateTimeString, format) {
             var dateTime = new Date(dateTimeString);
-            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
 
             return formattedDateTime;
         }
 
     </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
