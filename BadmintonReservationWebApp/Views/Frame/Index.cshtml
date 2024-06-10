@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Frame";
 }
 
 <div class="row">
@@ -78,13 +78,13 @@
                         console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
-                        html += '<td>' + extractHourAndMinute(item.timeFrom) + '</td>';
-                        html += '<td>' + extractHourAndMinute(item.timeTo) + '</td>';
+                        html += '<td>' + convertIntTime(item.timeFrom) + '</td>';
+                        html += '<td>' + convertIntTime(item.timeTo) + '</td>';
                         html += '<td>' + statusMap[item.status] + '</td>';
                         html += '<td>' + formatPrice(item.price) + ' VNĐ' + '</td>';
                         html += '<td>' + item.court.name + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</a></td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
@@ -96,16 +96,21 @@
             });
         }
 
-        function extractHourAndMinute(datetimeStr) {
-            let date = new Date(datetimeStr);
-            let hours = date.getHours().toString().padStart(2, '0');
-            let minutes = date.getMinutes().toString().padStart(2, '0');
+        function convertIntTime(hhmm) {
+            // Pad the number to ensure it is 4 digits
+            let timeString = hhmm.toString().padStart(4, '0');
+
+            // Extract hours and minutes
+            let hours = timeString.slice(0, 2);
+            let minutes = timeString.slice(2);
+
+            // Combine them in hh:mm format
             return `${hours}:${minutes}`;
         }
 
         function formatDateTime(dateTimeString, format) {
             var dateTime = new Date(dateTimeString);
-            var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'UTC', ...format });
+                var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
             return formattedDateTime;
         }
 
@@ -153,8 +158,15 @@
                 var timeFromParts = timeFrom.split(':');
                 var timeToParts = timeTo.split(':');
 
-                var timeFromFormatted = timeFromParts[0].padStart(2, '0') + ':' + timeFromParts[1].padStart(2, '0') + ':00';
-                var timeToFormatted = timeToParts[0].padStart(2, '0') + ':' + timeToParts[1].padStart(2, '0') + ':00';
+                // Convert each part to an integer to remove leading zeros, using base 10
+                var timeFromHour = parseInt(timeFromParts[0], 10);
+                var timeFromMinute = timeFromParts[1];
+                var timeToHour = parseInt(timeToParts[0], 10);
+                var timeToMinute = timeToParts[1];
+
+                // Combine the parts back into formatted strings
+                var timeFromFormatted = parseInt(timeFromHour.toString() + timeFromMinute.toString(), 10);
+                var timeToFormatted = parseInt(timeToHour.toString() + timeToMinute.toString(), 10);
                 // Proceed with AJAX request
                 var data = {
                     timeFrom: timeFromFormatted,
@@ -181,7 +193,7 @@
                     },
                     error: function (xhr, error) {
                         console.log(xhr);
-                        alert(`Something went wrong!`);
+                        alert(`Something went wrong: ${xhr.responseText}`);
                     }
                 });
             } else {
@@ -277,7 +289,7 @@
                     },
                     error: function (xhr, error) {
                         console.log(xhr);
-                        alert(`Something went wrong!`);
+                        alert(`Something went wrong: ${xhr.responseText}`);
                     }
                 });
             } else {
@@ -285,6 +297,11 @@
                 $("#TimeTo").siblings(".text-danger").text("Time To must be greater than Time From.");
             }
         }
+    }
+
+    function redirectToReport(id) {
+            var url = '/Frame/report/' + id;
+            window.location.href = url;
     }
 
     </script>

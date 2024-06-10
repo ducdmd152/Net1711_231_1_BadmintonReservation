@@ -5,12 +5,10 @@ namespace BadmintonReservationData.DTOs;
 public class CreateFrameRequestDTO
 {
     [Required(ErrorMessage = "Time From is required")]
-    [DataType(DataType.Time)]
-    public TimeSpan TimeFrom { get; set; }
+    public int TimeFrom { get; set; }
 
     [Required(ErrorMessage = "Time To is required")]
-    [DataType(DataType.Time)]
-    public TimeSpan TimeTo { get; set; }
+    public int TimeTo { get; set; }
 
     [Required(ErrorMessage = "Status is required")]
     public int Status { get; set; }
