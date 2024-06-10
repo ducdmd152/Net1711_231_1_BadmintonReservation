@@ -82,7 +82,7 @@ namespace BadmintonReservationBusiness
                     }).ToList(),
                     Payment = new Payment
                     {
-                        Amount = bookingRequest.BookingDetails.Sum(d => d.Price),
+                        Amount = Math.Max(0, bookingRequest.BookingDetails.Sum(item => item.Price) - bookingRequest.PromotionAmount),
                         Status = bookingRequest.PaymentStatus,
                         CreatedDate = DateTime.Now,
                         UpdatedDate = DateTime.Now
@@ -132,11 +132,7 @@ namespace BadmintonReservationBusiness
                 booking.PromotionAmount = updateRequest.PromotionAmount;
                 booking.PaymentType = updateRequest.PaymentType;
                 booking.PaymentStatus = updateRequest.PaymentStatus;              
-                booking.UpdatedDate = DateTime.Now;
-                if (booking.Payment != null)
-                {
-                    booking.Payment.Status = updateRequest.PaymentStatus;
-                }
+                booking.UpdatedDate = DateTime.Now;                
 
                 foreach (var detail in updateRequest.BookingDetails)
                 {
@@ -153,6 +149,12 @@ namespace BadmintonReservationBusiness
                     {
                         // Handle if the booking detail does not exist
                     }
+                }
+
+                if (booking.Payment != null)
+                {
+                    booking.Payment.Amount = Math.Max(0, booking.BookingDetails.Sum(item => item.Price) - booking.PromotionAmount);
+                    booking.Payment.Status = booking.PaymentStatus;
                 }
 
                 booking.UpdatedDate = DateTime.Now;
