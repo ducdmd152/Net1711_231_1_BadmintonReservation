@@ -61,12 +61,16 @@
         });
 
         function loadData() {
+
+            var spin = document.getElementById('spinner-overlay');
+            spin.classList.remove('invisible');
             $.ajax({
                 url: '@Url.Action("GetAll", "Purchased")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 success: function (result) {
+                    spin.classList.add('invisible');
                     const statusMap = {
                         1: 'Active',
                         2: 'InActive'
@@ -88,6 +92,7 @@
                     $('.tblList').html(html);
                 },
                 error: function (xhr, error) {
+                    spin.classList.add('invisible');
                     alert(xhr.statusText);
                     alert(`Something went wrong!`);
                 }

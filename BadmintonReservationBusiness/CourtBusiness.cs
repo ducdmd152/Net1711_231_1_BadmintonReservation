@@ -1,5 +1,7 @@
 ﻿using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Enums;
 using BadmintonReservationData.Repository;
 using System;
 using System.Collections.Generic;
@@ -46,11 +48,11 @@ namespace BadmintonReservationBusiness
 
                 if (court == null)
                 {
-                    return new BusinessResult(-1, "No court data");
+                    return new BusinessResult(404, "No court data");
                 }
                 else
                 {
-                    return new BusinessResult(1, "Get court sucess", court);
+                    return new BusinessResult(200, "Get court sucess", court);
                 }
             }
             catch (Exception ex)
@@ -59,7 +61,7 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> CreateCourt(CourtRequestDTO courtRequest)
+        public async Task<IBusinessResult> CreateCourt(CreateCourtDTO courtRequest)
         { 
             await this.unitOfWork.BeginTransactionAsync();
             try
@@ -81,7 +83,7 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> UpdateCourt(CourtRequestDTO courtRequest)
+        public async Task<IBusinessResult> UpdateCourt(UpdateCourtDTO courtRequest)
         {
             await this.unitOfWork.BeginTransactionAsync();
             try
@@ -119,7 +121,19 @@ namespace BadmintonReservationBusiness
                     return new BusinessResult(-1, "No court data");
                 }
 
-                this.unitOfWork.CourtRepository.Remove(court);
+                court.Status = (int)CourtStatus.Delete;
+
+                List<Frame> listFrame = this.unitOfWork.FrameRepository.GetListByCourtId(court.Id);
+                if (listFrame != null && listFrame.Count > 0)
+                {
+                    foreach (Frame f in listFrame)
+                    {
+                        f.Status = (int)FrameStatus.Delete;
+                    }
+                }
+
+                this.unitOfWork.CourtRepository.Update(court);
+                this.unitOfWork.FrameRepository.UpdateRange(listFrame);
                 await this.unitOfWork.CommitTransactionAsync();
 
                 return new BusinessResult(200, "Delete Success");

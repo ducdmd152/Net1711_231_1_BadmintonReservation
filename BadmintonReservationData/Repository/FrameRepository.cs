@@ -42,12 +42,21 @@ namespace BadmintonReservationData.Repository
 	            .ToListAsync();
     	}
 
-	    public async Task<Frame?> GetByIdWithCourtAsync(int id)
+        public List<Frame> GetAllWithCourtId(int courtId)
+        {
+            return this._dbSet.Where(x => x.CourtId == courtId).ToList();
+        }
+
+        public List<Frame> GetListByCourtId(int id)
+        {
+            return this._dbSet.Where(x => x.CourtId == id).ToList();
+        }
+	     public async Task<Frame?> GetByIdWithCourtAsync(int id)
 	    {
 		    return await _dbSet
-			    .Where(item => item.Id == id && item.Status != (int) FrameStatus.Delete)
-			    .Include(item => item.Court)
-			    .SingleOrDefaultAsync();
+				    .Where(item => item.Id == id && item.Status != (int) FrameStatus.Delete)
+				    .Include(item => item.Court)
+				    .SingleOrDefaultAsync();
 	    }
 
 	    public async Task<Frame?> GetExistedFrame(int timeFrom, int timeTo, int courtId)
@@ -59,7 +68,7 @@ namespace BadmintonReservationData.Repository
 			            && item.Status != (int) FrameStatus.Delete
 			            )
 			            .Include(item => item.Court)
-			    .SingleOrDefaultAsync();
-	    }
+				    	.SingleOrDefaultAsync();
+    	}
     }
 }
