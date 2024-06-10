@@ -1,5 +1,7 @@
 using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Enums;
+using BadmintonReservationData.Utils;
 
 namespace BadmintonReservationBusiness;
 
@@ -32,54 +34,56 @@ public class FrameBusiness
         }
     }
 
-        public async Task<IBusinessResult> GetAllFrameAvailableForDate(DateTime bookingDate)
+    public async Task<IBusinessResult> GetAllFrameAvailableForDate(DateTime bookingDate)
+    {
+        try
         {
-            try
-            {
-                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableForDate();
-                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
+            var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableForDate();
+            var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
 
-                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
-                
-                if (availableFrameForBookingDate == null)
-                {
-                    return new BusinessResult(400, "No frame data");
-                }
-                else
-                {
-                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
-                }
-            }
-            catch (Exception ex)
+            var availableFrameForBookingDate =
+                frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
+
+            if (availableFrameForBookingDate == null)
             {
-                return new BusinessResult(500, ex.Message);
+                return new BusinessResult(400, "No frame data");
+            }
+            else
+            {
+                return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
             }
         }
-
-        public async Task<IBusinessResult> GetAllFrameAvailableOfCourtForDate(int id, DateTime bookingDate)
+        catch (Exception ex)
         {
-            try
+            return new BusinessResult(500, ex.Message);
+        }
+    }
+
+    public async Task<IBusinessResult> GetAllFrameAvailableOfCourtForDate(int id, DateTime bookingDate)
+    {
+        try
+        {
+            var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableOfCourtForDate(id);
+            var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
+
+            var availableFrameForBookingDate =
+                frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
+
+            if (availableFrameForBookingDate == null)
             {
-                var frames = await this.unitOfWork.FrameRepository.GetAllFrameAvailableOfCourtForDate(id);
-                var bookedFrameIdList = await this.unitOfWork.BookingDetailRepository.GetBookedFrameIdListAt(bookingDate);
-
-                var availableFrameForBookingDate = frames.Where(frame => !bookedFrameIdList.Any(item => item == frame.Id)).ToList();
-
-                if (availableFrameForBookingDate == null)
-                {
-                    return new BusinessResult(400, "No frame data");
-                }
-                else
-                {
-                    return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
-                }
+                return new BusinessResult(400, "No frame data");
             }
-            catch (Exception ex)
+            else
             {
-                return new BusinessResult(500, ex.Message);
+                return new BusinessResult(200, "Get available frame list sucess", availableFrameForBookingDate);
             }
         }
-    
+        catch (Exception ex)
+        {
+            return new BusinessResult(500, ex.Message);
+        }
+    }
+
     public async Task<IBusinessResult> GetById(int id)
     {
         try
@@ -90,19 +94,36 @@ public class FrameBusiness
             {
                 return new BusinessResult(400, "No frame data");
             }
-            else
+
+            var response = new FrameResponseDTO
             {
-                var response = new FrameResponseDTO
-                {
-                    Id = frame.Id,
-                    //TimeFrom = frame.TimeFrom.TimeOfDay,
-                    //TimeTo = frame.TimeTo.TimeOfDay,
-                    Price = frame.Price,
-                    Status = frame.Status,
-                    CourtId = frame.CourtId
-                };
-                return new BusinessResult(200, "Get frame success", response);
+                Id = frame.Id,
+                TimeFrom = frame.TimeFrom,
+                TimeTo = frame.TimeTo,
+                Price = frame.Price,
+                Status = frame.Status,
+                CourtId = frame.CourtId
+            };
+            return new BusinessResult(200, "Get frame success", response);
+        }
+        catch (Exception ex)
+        {
+            return new BusinessResult(500, ex.Message);
+        }
+    }
+
+    public async Task<IBusinessResult> GetByIdIncludeCourt(int id)
+    {
+        try
+        {
+            var frame = await unitOfWork.FrameRepository.GetByIdWithCourtAsync(id);
+
+            if (frame == null)
+            {
+                return new BusinessResult(400, "No frame data");
             }
+
+            return new BusinessResult(200, "Get frame success", frame);
         }
         catch (Exception ex)
         {
@@ -112,14 +133,22 @@ public class FrameBusiness
 
     public async Task<IBusinessResult> CreateFrame(CreateFrameRequestDTO createFrameRequestDto)
     {
+        //Check existed Frame
+        var frameExisted = await unitOfWork.FrameRepository.GetExistedFrame(createFrameRequestDto.TimeFrom,
+            createFrameRequestDto.TimeTo, createFrameRequestDto.CourtId);
+        if (frameExisted != null)
+        {
+            return new BusinessResult(400,
+                $"A frame already exists for the court '{frameExisted.Court.Name}' from {TimeConverter.ConvertIntTime(frameExisted.TimeFrom)} to {TimeConverter.ConvertIntTime(frameExisted.TimeTo)}.");
+        }
+
         await this.unitOfWork.BeginTransactionAsync();
         try
         {
-            var baseDate = DateTime.Today;
             var frame = new Frame()
             {
-                //TimeFrom = baseDate.Add(createFrameRequestDto.TimeFrom),
-                //TimeTo = baseDate.Add(createFrameRequestDto.TimeTo),
+                TimeFrom = createFrameRequestDto.TimeFrom,
+                TimeTo = createFrameRequestDto.TimeTo,
                 Status = createFrameRequestDto.Status,
                 Price = createFrameRequestDto.Price,
                 CourtId = createFrameRequestDto.CourtId
@@ -138,6 +167,16 @@ public class FrameBusiness
 
     public async Task<IBusinessResult> UpdateFrame(UpdateFrameRequestDTO updateFrameRequestDto)
     {
+        //Check existed Frame
+        var frameExisted = await unitOfWork.FrameRepository.GetExistedFrame(
+            TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom),
+            TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo), updateFrameRequestDto.CourtId);
+        if (frameExisted != null)
+        {
+            return new BusinessResult(400,
+                $"A frame already exists for the court '{frameExisted.Court.Name}' from {TimeConverter.ConvertIntTime(frameExisted.TimeFrom)} to {TimeConverter.ConvertIntTime(frameExisted.TimeTo)}.");
+        }
+
         await this.unitOfWork.BeginTransactionAsync();
         try
         {
@@ -147,9 +186,10 @@ public class FrameBusiness
             {
                 return new BusinessResult(400, "No frame data");
             }
+
             var baseDate = DateTime.Today;
-            //frame.TimeFrom = baseDate.Add(updateFrameRequestDto.TimeFrom);
-            //frame.TimeTo = baseDate.Add(updateFrameRequestDto.TimeTo);
+            frame.TimeFrom = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom);
+            frame.TimeTo = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo);
             frame.Status = updateFrameRequestDto.Status;
             frame.Price = updateFrameRequestDto.Price;
             frame.CourtId = updateFrameRequestDto.CourtId;
@@ -177,7 +217,8 @@ public class FrameBusiness
                 return new BusinessResult(-1, "No frame data");
             }
 
-            unitOfWork.FrameRepository.Remove(frame);
+            frame.Status = (int)FrameStatus.Delete;
+            unitOfWork.FrameRepository.Update(frame);
             await unitOfWork.CommitTransactionAsync();
 
             return new BusinessResult(200, "Delete Success");
@@ -187,5 +228,5 @@ public class FrameBusiness
             this.unitOfWork.RollbackTransaction();
             return new BusinessResult(500, ex.Message);
         }
-    }  
+    }
 }

@@ -1,6 +1,9 @@
+using System.Net;
 using System.Text;
+using BadmintonReservationBusiness;
 using BadmintonReservationData;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationData.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -22,11 +25,15 @@ public class FrameController : Controller
     [HttpGet]
     public IActionResult Add()
     {
-        return PartialView("Add", new CreateFrameRequestDTO());
+        return PartialView("Add", new CreateFrameRequestDTO
+        {
+            TimeFrom = 600,
+            TimeTo = 700
+        });
     }
 
     [HttpGet]
-    public async Task<List<Frame>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
         try
         {
@@ -39,20 +46,24 @@ public class FrameController : Controller
                     {
                         var content = await response.Content.ReadAsStringAsync();
                         result = JsonConvert.DeserializeObject<List<Frame>>(content);
+                        return Ok(result);
+                    }
+                    else
+                    {
+                        var errorMessage = $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}";
+                        return StatusCode((int)response.StatusCode, errorMessage);
                     }
                 }
             }
-
-            return result;
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
     [HttpPost]
-    public async Task<Frame> Create([FromBody] CreateFrameRequestDTO createFrameRequestDto)
+    public async Task<IActionResult> Create([FromBody] CreateFrameRequestDTO createFrameRequestDto)
     {
         try
         {
@@ -66,19 +77,25 @@ public class FrameController : Controller
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var createdFrame = JsonConvert.DeserializeObject<Frame>(responseContent);
-                        return createdFrame;
+                        return Ok(createdFrame);
+                    }
+
+                    if (response.StatusCode == HttpStatusCode.BadRequest)
+                    {
+                        var errorMessage = JsonConvert.DeserializeObject<BusinessResult>(await response.Content.ReadAsStringAsync()).Message;
+                        return BadRequest(errorMessage);
                     }
                     else
                     {
-                        throw new Exception(
-                            $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}");
+                        var errorMessage = $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}";
+                        return StatusCode((int)response.StatusCode, errorMessage);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            throw new Exception($"Internal server error: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
@@ -99,8 +116,8 @@ public class FrameController : Controller
                         result = new UpdateFrameRequestDTO()
                         {
                             Id = frameResponse.Id,
-                            TimeFrom = frameResponse.TimeFrom,
-                            TimeTo = frameResponse.TimeTo,
+                            TimeFrom = TimeConverter.ConvertToTimeSpan(frameResponse.TimeFrom),
+                            TimeTo = TimeConverter.ConvertToTimeSpan(frameResponse.TimeTo),
                             Price = frameResponse.Price,
                             CourtId = frameResponse.CourtId,
                             Status = frameResponse.Status
@@ -118,7 +135,7 @@ public class FrameController : Controller
     }
 
     [HttpPut]
-    public async Task<Frame> Update([FromBody] UpdateFrameRequestDTO updateFrameRequestDto)
+    public async Task<IActionResult> Update([FromBody] UpdateFrameRequestDTO updateFrameRequestDto)
     {
         try
         {
@@ -132,19 +149,25 @@ public class FrameController : Controller
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var updatedFrame = JsonConvert.DeserializeObject<Frame>(responseContent);
-                        return updatedFrame;
+                        return Ok(updatedFrame);
+                    }
+
+                    if (response.StatusCode == HttpStatusCode.BadRequest)
+                    {
+                        var errorMessage = JsonConvert.DeserializeObject<BusinessResult>(await response.Content.ReadAsStringAsync()).Message;
+                        return BadRequest(errorMessage);
                     }
                     else
                     {
-                        throw new Exception(
-                            $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}");
+                        var errorMessage = $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}";
+                        return StatusCode((int)response.StatusCode, errorMessage);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            throw new Exception($"Internal server error: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
@@ -169,6 +192,32 @@ public class FrameController : Controller
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Report(int id)
+    {
+        try
+        {
+            Frame result = null;
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}/GetByIdIncludeCourt/{id}"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        result = JsonConvert.DeserializeObject<Frame>(content);
+                    }
+                }
+            }
+
+            return View("report", result);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
 }

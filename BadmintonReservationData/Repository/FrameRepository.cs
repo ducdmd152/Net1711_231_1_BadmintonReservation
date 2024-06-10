@@ -37,8 +37,29 @@ namespace BadmintonReservationData.Repository
         public async Task<List<Frame>> GetAllWithCourtAsync()
     	{
 	        return await _dbSet
+		        .Where(item => item.Status != (int) FrameStatus.Delete)
 	            .Include(item => item.Court)
 	            .ToListAsync();
     	}
+
+	    public async Task<Frame?> GetByIdWithCourtAsync(int id)
+	    {
+		    return await _dbSet
+			    .Where(item => item.Id == id && item.Status != (int) FrameStatus.Delete)
+			    .Include(item => item.Court)
+			    .SingleOrDefaultAsync();
+	    }
+
+	    public async Task<Frame?> GetExistedFrame(int timeFrom, int timeTo, int courtId)
+	    {
+		    return await _dbSet.Where(
+			    item => item.TimeFrom == timeFrom
+			            && item.TimeTo == timeTo
+			            && item.CourtId == courtId
+			            && item.Status != (int) FrameStatus.Delete
+			            )
+			            .Include(item => item.Court)
+			    .SingleOrDefaultAsync();
+	    }
     }
 }

@@ -51,6 +51,24 @@ public class FrameController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("GetByIdIncludeCourt/{id}")]
+    public async Task<IActionResult> GetByIdIncludeCourt(int id)
+    {
+        var result = await _business.GetByIdIncludeCourt(id);
+        switch (result.Status)
+        {
+            case 400:
+                return BadRequest(result);
+            case 404:
+                return NotFound(result);
+            case 200:
+                return Ok(result.Data);
+            default:
+                return StatusCode(500, "An internal server error occurred. Please try again later.");
+        }
+    }
+
     
     
     [HttpPost]
