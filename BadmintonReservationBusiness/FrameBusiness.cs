@@ -134,12 +134,12 @@ public class FrameBusiness
     public async Task<IBusinessResult> CreateFrame(CreateFrameRequestDTO createFrameRequestDto)
     {
         //Check existed Frame
-        var frameExisted = await unitOfWork.FrameRepository.GetExistedFrame(createFrameRequestDto.TimeFrom,
+        var frameExisted = await unitOfWork.FrameRepository.GetExistedFrameForCreate(createFrameRequestDto.TimeFrom,
             createFrameRequestDto.TimeTo, createFrameRequestDto.CourtId);
-        if (frameExisted != null)
+        if (frameExisted == true)
         {
             return new BusinessResult(400,
-                $"A frame already exists for the court '{frameExisted.Court.Name}' from {TimeConverter.ConvertIntTime(frameExisted.TimeFrom)} to {TimeConverter.ConvertIntTime(frameExisted.TimeTo)}.");
+                $"A frame already exists for the court from {TimeConverter.ConvertIntTime(createFrameRequestDto.TimeFrom)} to {TimeConverter.ConvertIntTime(createFrameRequestDto.TimeTo)}.");
         }
 
         await this.unitOfWork.BeginTransactionAsync();
@@ -167,14 +167,20 @@ public class FrameBusiness
 
     public async Task<IBusinessResult> UpdateFrame(UpdateFrameRequestDTO updateFrameRequestDto)
     {
-        //Check existed Frame
-        var frameExisted = await unitOfWork.FrameRepository.GetExistedFrame(
-            TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom),
-            TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo), updateFrameRequestDto.CourtId);
-        if (frameExisted != null)
+        if (!(TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom) == updateFrameRequestDto.OldTimeFrom &&
+              TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo) == updateFrameRequestDto.OldTimeTo &&
+              updateFrameRequestDto.CourtId == updateFrameRequestDto.OldCourtId))
         {
-            return new BusinessResult(400,
-                $"A frame already exists for the court '{frameExisted.Court.Name}' from {TimeConverter.ConvertIntTime(frameExisted.TimeFrom)} to {TimeConverter.ConvertIntTime(frameExisted.TimeTo)}.");
+            //Check existed Frame
+            var frameExisted = await unitOfWork.FrameRepository.GetExistedFrameForUpdate(
+                updateFrameRequestDto.OldTimeFrom, updateFrameRequestDto.OldTimeTo, updateFrameRequestDto.OldCourtId,
+                TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom),
+                TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo), updateFrameRequestDto.CourtId);
+            if (frameExisted == true)
+            {
+                return new BusinessResult(400,
+                    $"A frame already exists for the court from {TimeConverter.ConvertIntTime(updateFrameRequestDto.TimeFrom.Hours * 100 + updateFrameRequestDto.TimeFrom.Minutes)} to {TimeConverter.ConvertIntTime(updateFrameRequestDto.TimeTo.Hours * 100 + updateFrameRequestDto.TimeTo.Minutes)}.");
+            }
         }
 
         await this.unitOfWork.BeginTransactionAsync();
@@ -187,7 +193,6 @@ public class FrameBusiness
                 return new BusinessResult(400, "No frame data");
             }
 
-            var baseDate = DateTime.Today;
             frame.TimeFrom = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom);
             frame.TimeTo = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo);
             frame.Status = updateFrameRequestDto.Status;

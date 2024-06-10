@@ -118,6 +118,9 @@ public class FrameController : Controller
                             Id = frameResponse.Id,
                             TimeFrom = TimeConverter.ConvertToTimeSpan(frameResponse.TimeFrom),
                             TimeTo = TimeConverter.ConvertToTimeSpan(frameResponse.TimeTo),
+                            OldTimeFrom = frameResponse.TimeFrom,
+                            OldTimeTo = frameResponse.TimeTo,
+                            OldCourtId = frameResponse.CourtId,
                             Price = frameResponse.Price,
                             CourtId = frameResponse.CourtId,
                             Status = frameResponse.Status

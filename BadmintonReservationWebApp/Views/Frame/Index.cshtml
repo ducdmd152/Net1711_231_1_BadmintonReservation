@@ -249,7 +249,9 @@
             // Get values from form
             var timeFrom = $("#TimeFrom").val();
             var timeTo = $("#TimeTo").val();
-
+            var oldTimeFrom = $("#OldTimeFrom").val();
+            var oldTimeTo = $("#OldTimeTo").val();
+            var oldCourtId = $("#OldCourtId").val();
             // Convert time strings to Date objects
             var timeFromDate = new Date("2000-01-01T" + timeFrom);
             var timeToDate = new Date("2000-01-01T" + timeTo);
@@ -267,6 +269,9 @@
                     id: id,
                     timeFrom: timeFromFormatted,
                     timeTo: timeToFormatted,
+                    oldTimeFrom: oldTimeFrom,
+                    oldTimeTo: oldTimeTo,
+                    oldCourtId: oldCourtId,
                     status: $("#Status").val(),
                     price: $("#Price").val(),
                     courtId: $("#CourtId").val(),
