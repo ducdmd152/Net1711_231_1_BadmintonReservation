@@ -52,7 +52,7 @@ namespace BadmintonReservationBusiness
             }
             catch (Exception ex)
             {
-                return new BusinessResult(100, ex.Message);
+                return new BusinessResult(500, ex.Message);
             }
         }
 
@@ -131,8 +131,12 @@ namespace BadmintonReservationBusiness
                 booking.Status = updateRequest.Status;
                 booking.PromotionAmount = updateRequest.PromotionAmount;
                 booking.PaymentType = updateRequest.PaymentType;
-                booking.PaymentStatus = updateRequest.PaymentStatus;
+                booking.PaymentStatus = updateRequest.PaymentStatus;              
                 booking.UpdatedDate = DateTime.Now;
+                if (booking.Payment != null)
+                {
+                    booking.Payment.Status = updateRequest.PaymentStatus;
+                }
 
                 foreach (var detail in updateRequest.BookingDetails)
                 {
