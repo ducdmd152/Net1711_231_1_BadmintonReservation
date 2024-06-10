@@ -3,7 +3,8 @@
 <div class="form-group row">
     <div class="col-md-6">
         <label for="AmountHour">Amount Hour</label>
-        @Html.EditorFor(model => model.AmountHour, new { htmlAttributes = new { @class = "form-control", @type = "number", @min = "0", @step = "0.1" } })
+        @Html.EditorFor(model => model.AmountHour, new { htmlAttributes = new { @class = "form-control", @min = "0" } })
+        @Html.ValidationMessageFor(model => model.AmountHour, "", new { @class = "text-danger" })
     </div>
     <div class="col-md-6">
         <label for="Status">Status</label>
