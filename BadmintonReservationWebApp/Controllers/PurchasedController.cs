@@ -34,7 +34,7 @@ public class PurchasedController : Controller
             PurchasedHoursMonthly result = null;
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Purchased/{id}"))
+                using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}/GetById/{id}"))
                 {
                     if (response.IsSuccessStatusCode)
                     {

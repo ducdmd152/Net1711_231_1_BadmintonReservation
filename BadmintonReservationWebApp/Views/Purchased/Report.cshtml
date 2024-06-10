@@ -98,14 +98,14 @@
             <dd class="col-sm-8">@statusMap[@Model.Status]</dd>
 
             <dt class="col-sm-4">Customer Name:</dt>
-            <dd class="col-sm-8">@Model.Customer?.FullName ?? "No data available"</dd>
-
+            <dd class="col-sm-8">@Model.Customer.FullName</dd>
         </div>
         <div class="col-md-6 row">
             <dt class="col-sm-4">Payment Amount:</dt>
             <dd class="col-sm-8">@FormatPriceVND(@Model.Payment?.Amount ?? 0)</dd>
 
-           
+            <dt class="col-sm-4">Last Updated At:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.UpdatedDate)</dd>
         </div>
     </dl>
 </div>
