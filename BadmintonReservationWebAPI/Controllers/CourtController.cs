@@ -1,4 +1,5 @@
 using BadmintonReservationBusiness;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,7 +39,7 @@ namespace BadmintonReservationWebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("GetById")]
+        [Route("GetById/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _business.GetById(id);
@@ -51,7 +52,7 @@ namespace BadmintonReservationWebAPI.Controllers
                     return NotFound(result);
                     break;
                 case 200:
-                    return Ok(result);
+                    return Ok(result.Data);
                     break;
                 default:
                     return StatusCode(500, "An internal server error occurred. Please try again later.");
@@ -60,7 +61,7 @@ namespace BadmintonReservationWebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCourt(CourtRequestDTO courtRequest)
+        public async Task<IActionResult> CreateCourt(CreateCourtDTO courtRequest)
         {
             var result = await _business.CreateCourt(courtRequest);
             switch (result.Status)
@@ -81,7 +82,7 @@ namespace BadmintonReservationWebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourt(CourtRequestDTO courtRequest)
+        public async Task<IActionResult> UpdateCourt(UpdateCourtDTO courtRequest)
         {
             var result = await _business.UpdateCourt(courtRequest);
             switch (result.Status)
@@ -101,8 +102,8 @@ namespace BadmintonReservationWebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
-        public async Task<IActionResult> UpdateCourt(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> RemoveCourt(int id)
         {
             var result = await _business.RemoveCourt(id);
             switch (result.Status)

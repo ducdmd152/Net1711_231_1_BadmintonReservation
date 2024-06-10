@@ -32,7 +32,7 @@ public class FrameController : ControllerBase
                 return StatusCode(500, "An internal server error occurred. Please try again later.");
         }
     }
-    
+
     [HttpGet]
     [Route("GetById/{id}")]
     public async Task<IActionResult> GetById(int id)
@@ -156,5 +156,13 @@ public class FrameController : ControllerBase
     {
         var result = await _business.GetAllFrameAvailableOfCourtForDate(id, bookingDate);
         return GenerateActionResult(result);
+    }
+
+    [HttpGet]
+    [Route("Court/{id}")]
+    public IActionResult GetAllFrameWithCourtId(int id)
+    {
+        var result = this._business.GetAllFrameWithCourtId(id);
+        return Ok(result);
     }
 }
