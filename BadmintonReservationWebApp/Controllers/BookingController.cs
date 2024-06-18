@@ -110,7 +110,9 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Booking>> GetAll(
+        public async Task<PageableResponseDTO<Booking>> GetAll(
+            int pageIndex = 1,
+            int pageSize = 4,
             string searchText = "",
             int status = 0,
             int paymentType = 0,
@@ -121,10 +123,13 @@ namespace BadmintonReservationWebApp.Controllers
         {
             try
             {
-                var result = new List<Booking>();
+                var result = new PageableResponseDTO<Booking>();
                 using (var httpClient = new HttpClient())
                 {
                     var queryParams = new List<string>();
+
+                    queryParams.Add($"pageIndex={Uri.EscapeDataString(pageIndex.ToString())}");
+                    queryParams.Add($"pageSize={Uri.EscapeDataString(pageSize.ToString())}");
 
                     if (!string.IsNullOrEmpty(searchText))
                         queryParams.Add($"searchText={Uri.EscapeDataString(searchText)}");
@@ -155,7 +160,7 @@ namespace BadmintonReservationWebApp.Controllers
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<List<Booking>>(content);
+                            result = JsonConvert.DeserializeObject<PageableResponseDTO<Booking>>(content);
                         }
                     }
                 }

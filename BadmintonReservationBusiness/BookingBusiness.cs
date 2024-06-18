@@ -36,11 +36,11 @@ namespace BadmintonReservationBusiness
             }
         }
 
-        public async Task<IBusinessResult> GetAllWithFilterAsync(BookingFilterDTO filterDTO)
+        public async Task<IBusinessResult> GetAllWithFilterWithDetailsAsync(int pageIndex, int pageSize, BookingFilterDTO filterDTO)
         {
             try
             {
-                var result = await this._unitOfWork.BookingRepository.GetAllWithFilterWithDetailsAsync(filterDTO);
+                var result = await this._unitOfWork.BookingRepository.GetAllWithFilterWithDetailsAsync(pageIndex, pageSize, filterDTO);
 
                 if (result == null)
                 {

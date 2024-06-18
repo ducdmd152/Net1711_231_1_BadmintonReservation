@@ -28,12 +28,13 @@ namespace BadmintonReservationData.Repository
                               .ToListAsync();
         }
 
-        public async Task<List<Booking>> GetAllWithFilterWithDetailsAsync(BookingFilterDTO filter)
+        public async Task<PageableResponseDTO<Booking>> GetAllWithFilterWithDetailsAsync(int pageIndex, int pageSize, BookingFilterDTO filter)
         {
-            return await this._dbSet
+            // Query without pagination to get the total count
+            var query = this._dbSet
                               .IgnoreAutoIncludes()
-                              .Where(item => item.Id.ToString().Contains(filter.SearchText) 
-                                  || item.Customer.FullName.ToLower().Contains(filter.SearchText.ToLower()) 
+                              .Where(item => item.Id.ToString().Contains(filter.SearchText)
+                                  || item.Customer.FullName.ToLower().Contains(filter.SearchText.ToLower())
                                   || item.Customer.PhoneNumber.ToLower().Contains(filter.SearchText.ToLower()))
                               .Where(item => filter.Status == 0 || item.Status == filter.Status)
                               .Where(item => filter.BookingType == 0 || item.BookingTypeId == filter.BookingType)
@@ -46,9 +47,24 @@ namespace BadmintonReservationData.Repository
                               .Include(item => item.Payment)
                               .Include(item => item.BookingDetails)
                               .ThenInclude(bookingDetail => bookingDetail.Frame)
-                              .ThenInclude(frame => frame.Court)
-                              .ToListAsync();
-        }        
+                              .ThenInclude(frame => frame.Court);
+
+            var totalItemCount = await query.CountAsync();
+            var totalOfPages = (int)Math.Ceiling((double)totalItemCount / pageSize);
+
+            // Apply pagination
+            var list = await query.Skip((pageIndex - 1) * pageSize)
+                                  .Take(pageSize)
+                                  .ToListAsync();
+
+            return new PageableResponseDTO<Booking>()
+            {
+                List = list.ToList(),
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalOfPages = totalOfPages
+            };
+        }
 
         public async Task<Booking> GetByIdWithDetailsAsync(int id)
         {

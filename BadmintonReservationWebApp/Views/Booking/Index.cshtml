@@ -123,6 +123,8 @@
     </div>
 </div>
 
+<nav id="paginationControls" aria-label="Page navigation" style="display: flex; justify-content: center; column-gap: 12px;">
+</nav>
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
@@ -141,7 +143,7 @@
             loadData();
         }
 
-        function loadData() {
+        function loadData(pageIndex = 1, pageSize = 4) {
             var spin = document.getElementById('spinner-overlay');
             var searchText = document.getElementById('searchInput').value;
             var statusFilter = document.getElementById('statusFilter').value;
@@ -164,7 +166,9 @@
                     paymentStatus: paymentStatusFilter,
                     bookingType: bookingTypeFilter,
                     bookingDateFrom: bookingDateFrom,
-                    bookingDateTo: bookingDateTo
+                    bookingDateTo: bookingDateTo,
+                    pageIndex: pageIndex,
+                    pageSize: pageSize
                 },
                 success: function (result) {
                     spin.classList.add('invisible');
@@ -190,7 +194,7 @@
                         5: 'Hourly'
                     };
                     var html = '';
-                    $.each(result, function (key, item) {
+                    $.each(result.list, function (key, item) {
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
                         html += '<td>' + item.customer.fullName + '</td>';
@@ -204,6 +208,9 @@
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
+
+                    // Generate pagination controls
+                    generatePagination(result.pageIndex, result.totalOfPages);
                 },
                 error: function (xhr, error) {
                     alert(xhr.statusText);
@@ -211,6 +218,34 @@
                     spin.classList.add('invisible');
                 }
             });
+        }
+
+        function generatePagination(currentPage, totalPages) {
+            var paginationHtml = '';
+
+            if (currentPage > 1) {
+                paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + (currentPage - 1) + ')">Prev</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Prev</button>';
+            }
+
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<button class="btn btn-info">' + i + '</button>';
+                } else {
+                    paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + i + ')">' + i + '</button>';
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHtml += '<button class="btn btn-outline-secondary"  onclick="loadData(' + (currentPage + 1) + ')">Next</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Next</button>';
+            }
+
+            $('#paginationControls').html(paginationHtml);
         }
 
         function add() {

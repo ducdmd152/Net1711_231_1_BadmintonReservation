@@ -18,6 +18,8 @@ namespace BadmintonReservationWebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll(
+            int pageIndex = 1,
+            int pageSize = 4,
             string? searchText = "",
             int status = 0,
             int paymentType = 0,
@@ -37,7 +39,7 @@ namespace BadmintonReservationWebAPI.Controllers
                 BookingDateTo = bookingDateTo
             };
 
-            var result = await _business.GetAllWithFilterAsync(filterDTO);
+            var result = await _business.GetAllWithFilterWithDetailsAsync(pageIndex, pageSize, filterDTO);
             return GenerateActionResult(result);
         }
 
