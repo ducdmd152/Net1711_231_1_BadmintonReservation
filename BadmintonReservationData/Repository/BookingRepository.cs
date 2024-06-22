@@ -47,7 +47,8 @@ namespace BadmintonReservationData.Repository
                               .Include(item => item.Payment)
                               .Include(item => item.BookingDetails)
                               .ThenInclude(bookingDetail => bookingDetail.Frame)
-                              .ThenInclude(frame => frame.Court);
+                              .ThenInclude(frame => frame.Court)
+                              .OrderByDescending(item => item.CreatedDate);
 
             var totalItemCount = await query.CountAsync();
             var totalOfPages = (int)Math.Ceiling((double)totalItemCount / pageSize);
