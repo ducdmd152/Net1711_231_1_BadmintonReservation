@@ -229,15 +229,34 @@ namespace BadmintonReservationData
                     .HasColumnType("datetime")
                     .HasColumnName("created_date");
 
+                entity.Property(e => e.Amentities)
+                                  .HasMaxLength(512)
+                                  .HasColumnName("amentities");
+
+                entity.Property(e => e.Capacity).HasColumnName("capacity");
+
+                entity.Property(e => e.CloseHours).HasColumnName("close_hours");
+
                 entity.Property(e => e.Name)
-                    .HasMaxLength(100)
-                    .HasColumnName("name");
+                    .HasMaxLength(512)
+                    .HasColumnName("court_name");
+
+                entity.Property(e => e.CourtType).HasColumnName("court_type");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.UpdatedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_date");
+
+                entity.Property(e => e.OpeningHours).HasColumnName("opening_hours");
+
+                entity.Property(e => e.SurfaceType).HasColumnName("surface_type");
+
+                entity.Property(e => e.TotalBooking)
+                    .HasMaxLength(512)
+                    .HasColumnName("total_booking");
+
             });
 
             modelBuilder.Entity<Customer>(entity =>
@@ -303,6 +322,14 @@ namespace BadmintonReservationData
                 entity.Property(e => e.Price).HasColumnName("price");
 
                 entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.Label)
+                    .HasMaxLength(512)
+                    .HasColumnName("label");
+
+                entity.Property(e => e.Note)
+                    .HasMaxLength(512)
+                    .HasColumnName("note");
 
                 entity.Property(e => e.TimeFrom)
                     .HasColumnName("time_from");

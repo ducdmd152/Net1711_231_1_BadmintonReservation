@@ -15,8 +15,10 @@ namespace BadmintonReservationData
         public int TimeTo { get; set; }
         public int Status { get; set; }
         public double Price { get; set; }
+        public string Label { get; set; } = null!;
+        public string Note { get; set; } = null!;
         public int CourtId { get; set; }
-
+            
         public virtual Court Court { get; set; } = null!;
 
         public override string ToString()
