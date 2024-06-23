@@ -1,4 +1,5 @@
 using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using BadmintonReservationData.Enums;
 using BadmintonReservationData.Utils;
@@ -14,11 +15,11 @@ public class FrameBusiness
         this.unitOfWork = unitOfWork;
     }
 
-    public async Task<IBusinessResult> GetAll()
+    public async Task<IBusinessResult> GetAll(int pageIndex, int pageSize, FrameFilterDTO filterDTO)
     {
         try
         {
-            var frames = await unitOfWork.FrameRepository.GetAllWithCourtAsync();
+            var frames = await unitOfWork.FrameRepository.GetAllWithCourtAsync(pageIndex, pageSize, filterDTO);
             if (frames == null)
             {
                 return new BusinessResult(400, "No frame data");
@@ -98,6 +99,8 @@ public class FrameBusiness
             var response = new FrameResponseDTO
             {
                 Id = frame.Id,
+                Label = frame.Label,
+                Note = frame.Note,
                 TimeFrom = frame.TimeFrom,
                 TimeTo = frame.TimeTo,
                 Price = frame.Price,
@@ -147,6 +150,8 @@ public class FrameBusiness
         {
             var frame = new Frame()
             {
+                Label = createFrameRequestDto.Label,
+                Note = createFrameRequestDto.Note,
                 TimeFrom = createFrameRequestDto.TimeFrom,
                 TimeTo = createFrameRequestDto.TimeTo,
                 Status = createFrameRequestDto.Status,
@@ -193,6 +198,8 @@ public class FrameBusiness
                 return new BusinessResult(400, "No frame data");
             }
 
+            frame.Note = updateFrameRequestDto.Note;
+            frame.Label = updateFrameRequestDto.Label;
             frame.TimeFrom = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeFrom);
             frame.TimeTo = TimeConverter.ConvertToInt(updateFrameRequestDto.TimeTo);
             frame.Status = updateFrameRequestDto.Status;

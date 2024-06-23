@@ -1,5 +1,7 @@
 ﻿using BadmintonReservationData.Base;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.Enums;
+using BadmintonReservationData.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace BadmintonReservationData.Repository
@@ -29,12 +31,40 @@ namespace BadmintonReservationData.Repository
                 .ToListAsync();
         }
 
-        public async Task<List<Frame>> GetAllWithCourtAsync()
+        public async Task<PageableResponseDTO<Frame>> GetAllWithCourtAsync(int pageIndex, int pageSize, FrameFilterDTO filterDTO)
         {
-            return await _dbSet
-                .Where(item => item.Status != (int)FrameStatus.Delete)
+            var query = _dbSet
                 .Include(item => item.Court)
+                .Where(item => item.Id.ToString().Contains(filterDTO.SearchText)
+                        || item.Label.ToLower().Contains(filterDTO.SearchText.ToLower())
+                        || item.Note.ToLower().Contains(filterDTO.SearchText.ToLower())
+                        || item.Court.Name.ToLower().Contains(filterDTO.SearchText.ToLower())
+                )
+                .Where(item => item.Price >= filterDTO.Price)
+                .Where(item => filterDTO.FrameStatus == 0 || item.Status == filterDTO.FrameStatus)
+                .Where(item =>
+                    (filterDTO.TimeFrom != 0 && filterDTO.TimeTo != 0 && item.TimeFrom >= filterDTO.TimeFrom && item.TimeTo <= filterDTO.TimeTo) ||
+                    (filterDTO.TimeFrom != 0 && filterDTO.TimeTo == 0 && item.TimeFrom >= filterDTO.TimeFrom) ||
+                    (filterDTO.TimeFrom == 0 && filterDTO.TimeTo != 0 && item.TimeFrom <= filterDTO.TimeTo) ||
+                    (filterDTO.TimeFrom == 0 && filterDTO.TimeTo == 0)
+                )
+                .Where(item => item.Status != (int)FrameStatus.Delete)
+                .OrderByDescending(item => item.CreatedDate);
+            var totalItemCount = await query.CountAsync();
+            var totalOfPages = (int)Math.Ceiling((double)totalItemCount / pageSize);
+
+            // Apply pagination
+            var list = await query.Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return new PageableResponseDTO<Frame>()
+            {
+                List = list.ToList(),
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalOfPages = totalOfPages
+            };
         }
 
         public async Task<Frame?> GetByIdWithCourtAsync(int id)

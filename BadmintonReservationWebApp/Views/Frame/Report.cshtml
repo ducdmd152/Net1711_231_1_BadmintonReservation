@@ -89,6 +89,9 @@
 
     <dl class="row details mt-3">
         <div class="col-md-6 row">
+            <dt class="col-sm-4">Label:</dt>
+            <dd class="col-sm-8">@Model.Label</dd>
+
             <dt class="col-sm-4">Time From:</dt>
             <dd class="col-sm-8">@ConvertIntTime(@Model.TimeFrom)</dd>
 
@@ -99,6 +102,9 @@
             <dd class="col-sm-8">@FormatPriceVND(@Model.Price)</dd>
         </div>
         <div class="col-md-6 row">
+            <dt class="col-sm-4">Note:</dt>
+            <dd class="col-sm-8">@Model.Note</dd>
+
             <dt class="col-sm-4">Court Name:</dt>
             <dd class="col-sm-8">@Model.Court.Name</dd>
 

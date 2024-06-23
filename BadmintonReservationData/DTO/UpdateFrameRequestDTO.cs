@@ -6,6 +6,10 @@ public class UpdateFrameRequestDTO
 {
     [Required(ErrorMessage = "Id is required")]
     public int Id { get; set; }
+    [Required(ErrorMessage = "Label is required")]
+    public string Label { get; set; }
+    [Required(ErrorMessage = "Note is required")]
+    public string Note { get; set; }
     [Required(ErrorMessage = "Time From is required")]
     [DataType(DataType.Time)]
     public TimeSpan TimeFrom { get; set; }
