@@ -1,6 +1,8 @@
 using BadmintonReservationBusiness;
+using BadmintonReservationData;
 using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
+using BadmintonReservationWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BadmintonReservationWebAPI.Controllers
@@ -18,9 +20,9 @@ namespace BadmintonReservationWebAPI.Controllers
 
         [HttpGet]
         [Route("GetAll")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] CourtSearchConditionDTO condition)
         {
-            var result = await _business.GetAll();
+            var result = await _business.GetAllWithCondition(condition);
             switch (result.Status)
             {
                 case 400:

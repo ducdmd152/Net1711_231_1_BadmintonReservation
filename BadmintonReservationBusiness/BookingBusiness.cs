@@ -126,6 +126,23 @@ namespace BadmintonReservationBusiness
                     }
                 }
 
+                try {
+                    var listFrameId = bookingRequest.BookingDetails.Select(x => x.FrameId).ToList();
+                    var listCourt = this._unitOfWork.FrameRepository.GetAllCourtWithFrameIds(listFrameId);
+                    var listCourtUpdate = new List<int>();
+                    foreach(var court in listCourt)
+                    {
+                        if(listCourtUpdate.All(x => x != court.Id))
+                        {
+                            int totalBooking = int.Parse(court.TotalBooking);
+                            court.TotalBooking = (totalBooking + 1).ToString();
+                        }
+                    }
+
+                    this._unitOfWork.CourtRepository.UpdateRange(listCourt);
+                } catch (Exception ex)
+                {
+                }
                 await this._unitOfWork.BookingRepository.CreateAsync(booking);
                 await this._unitOfWork.CommitTransactionAsync();
                 return new BusinessResult(200, "Booking created successfully", booking);

@@ -239,7 +239,7 @@ namespace BadmintonReservationData
 
                 entity.Property(e => e.Name)
                     .HasMaxLength(512)
-                    .HasColumnName("court_name");
+                    .HasColumnName("name");
 
                 entity.Property(e => e.CourtType).HasColumnName("court_type");
 

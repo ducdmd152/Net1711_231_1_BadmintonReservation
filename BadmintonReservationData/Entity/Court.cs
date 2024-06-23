@@ -20,7 +20,5 @@ namespace BadmintonReservationData
         public string? Amentities { get; set; }
         public int Capacity { get; set; }
         public int CourtType { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
     }
 }
