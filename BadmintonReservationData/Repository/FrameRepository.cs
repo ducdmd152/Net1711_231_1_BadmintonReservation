@@ -12,7 +12,7 @@ namespace BadmintonReservationData.Repository
     public class FrameRepository : GenericRepository<Frame>
     {
         public FrameRepository(UnitOfWork unitOfWork) : base(unitOfWork)
-        {            
+        {
         }
 
         public async Task<List<Frame>> GetAllFrameAvailableForDate()
@@ -33,14 +33,14 @@ namespace BadmintonReservationData.Repository
                               .Include(item => item.Court)
                               .ToListAsync();
         }
-        
+
         public async Task<List<Frame>> GetAllWithCourtAsync()
-    	{
-	        return await _dbSet
-		        .Where(item => item.Status != (int) FrameStatus.Delete)
-	            .Include(item => item.Court)
-	            .ToListAsync();
-    	}
+        {
+            return await _dbSet
+                .Where(item => item.Status != (int)FrameStatus.Delete)
+                .Include(item => item.Court)
+                .ToListAsync();
+        }
 
         public List<Frame> GetAllWithCourtId(int courtId)
         {
@@ -51,24 +51,29 @@ namespace BadmintonReservationData.Repository
         {
             return this._dbSet.Where(x => x.CourtId == id).ToList();
         }
-	     public async Task<Frame?> GetByIdWithCourtAsync(int id)
-	    {
-		    return await _dbSet
-				    .Where(item => item.Id == id && item.Status != (int) FrameStatus.Delete)
-				    .Include(item => item.Court)
-				    .SingleOrDefaultAsync();
-	    }
+        public async Task<Frame?> GetByIdWithCourtAsync(int id)
+        {
+            return await _dbSet
+                    .Where(item => item.Id == id && item.Status != (int)FrameStatus.Delete)
+                    .Include(item => item.Court)
+                    .SingleOrDefaultAsync();
+        }
 
-	    public async Task<Frame?> GetExistedFrame(int timeFrom, int timeTo, int courtId)
-	    {
-		    return await _dbSet.Where(
-			    item => item.TimeFrom == timeFrom
-			            && item.TimeTo == timeTo
-			            && item.CourtId == courtId
-			            && item.Status != (int) FrameStatus.Delete
-			            )
-			            .Include(item => item.Court)
-				    	.SingleOrDefaultAsync();
-    	}
+        public async Task<Frame?> GetExistedFrame(int timeFrom, int timeTo, int courtId)
+        {
+            return await _dbSet.Where(
+                item => item.TimeFrom == timeFrom
+                        && item.TimeTo == timeTo
+                        && item.CourtId == courtId
+                        && item.Status != (int)FrameStatus.Delete
+                        )
+                        .Include(item => item.Court)
+                        .SingleOrDefaultAsync();
+        }
+
+        public List<Court> GetAllCourtWithFrameIds(List<int> ids)
+        {
+            return this._dbSet.Where(x => ids.Contains(x.Id)).Select(x => x.Court).ToList();
+        }
     }
 }

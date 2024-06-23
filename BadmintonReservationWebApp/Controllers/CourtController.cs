@@ -20,19 +20,21 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Court>> GetAll()
+        public async Task<PageableResponseDTO<Court>> GetAll(CourtSearchCondition condition)
         {
             try
             {
-                var result = new List<Court>();
+                var queryParameter = CourtController.ToQueryString(condition);
+                var result = new PageableResponseDTO<Court>();
+                string baseUrl = URL + "api/Court/GetAll" + queryParameter;
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync(URL + "api/Court/GetAll"))
+                    using (var response = await httpClient.GetAsync(baseUrl))
                     {
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<List<Court>>(content);
+                            result = JsonConvert.DeserializeObject<PageableResponseDTO<Court>>(content);
                         }
                     }
                 }
@@ -101,7 +103,14 @@ namespace BadmintonReservationWebApp.Controllers
                             {
                                 Id = courtResponse.Id,
                                 Name = courtResponse.Name,
-                                Status = courtResponse.Status
+                                Status = courtResponse.Status,
+                                OpeningHours = courtResponse.OpeningHours,
+                                CloseHours = courtResponse.CloseHours,
+                                SurfaceType = courtResponse.SurfaceType,
+                                CourtType = courtResponse.CourtType,
+                                Amentities =courtResponse.Amentities,
+                                Capacity = courtResponse.Capacity
+                             
                             };
                         }
                     }
@@ -191,8 +200,15 @@ namespace BadmintonReservationWebApp.Controllers
                                 Id = courtResponse.Id,
                                 Name = courtResponse.Name,
                                 Status = courtResponse.Status,
+                                OpeningHours = courtResponse.OpeningHours,
+                                CloseHours = courtResponse.CloseHours,
+                                SurfaceType = courtResponse.SurfaceType,
+                                CourtType = courtResponse.CourtType,
+                                Amentities = courtResponse.Amentities,
+                                Capacity = courtResponse.Capacity,
                                 CreatedDate = courtResponse.CreatedDate,
                                 UpdatedDate = courtResponse.UpdatedDate,
+                                TotalBooking = courtResponse.TotalBooking
                             };
                         }
                     }
@@ -218,6 +234,17 @@ namespace BadmintonReservationWebApp.Controllers
                 throw new Exception(ex.Message);
             }
         }
+
+
+        public static string ToQueryString(object obj)
+        {
+            var properties = from p in obj.GetType().GetProperties()
+                             where p.GetValue(obj, null) != null
+                             select p.Name + "=" + Uri.EscapeDataString(p.GetValue(obj, null).ToString());
+
+            return "?" + string.Join("&", properties.ToArray());
+        }
+
 
     }
 }

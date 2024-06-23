@@ -17,6 +17,66 @@
     </div>
 </div>
 
+<form id="filterForm" class="d-flex flex-column mb-3 rounded" style="flex: 1; width: 100%; margin-right: 10px;" method="GET">
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+        <input type="text" style="flex: 1;" class="search-input" id="searchInput" name="search" placeholder="Search..." value="" onchange="handleInputChange()">
+        <div class="d-flex flex-column me-2 ms-2">
+            <select id="modeSearch" class="form-control" onchange="handleFilterChange()">
+                <option value="1">Court Name</option>
+                <option value="2">Total Booking</option>
+                <option value="3">Amenities</option>
+                <option value="4">Capacity</option>
+
+            </select>
+        </div>
+        <button class="btn-primary p-2" type="submit">Search</button>
+    </div>
+    <div class="d-flex justify-content-center align-items-center mb-3 gap-3 rounded" style="width: 100%;">
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="statusFilter">Booking Status</label>
+            <select id="statusFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All Status</option>
+                <option value="1">Active</option>
+                <option value="2">InActive</option>
+                <option value="3">Delete</option>
+            </select>
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="surfaceTypeFilter">Surface Type</label>
+            <select id="surfaceTypeFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All Surface</option>
+                <option value="1">Wooden</option>
+                <option value="2">Synthetic</option>
+                <option value="3">Rubberized</option>
+                <option value="4">Concrete</option>
+                <option value="5">Vinyl</option>
+            </select>
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="courtType">Court Type</label>
+            <select id="courtType" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All Court Type</option>
+                <option value="1">Singles</option>
+                <option value="2">Doubles</option>
+                <option value="3">Both</option>
+            </select>
+        </div>
+
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="openingHours">Opening Hours</label>
+            <input type="time" id="openingHours" class="form-control" onchange="handleFilterChange()">
+        </div>
+
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="closeHours">Close Hours</label>
+            <input type="time" id="closeHours" class="form-control" onchange="handleFilterChange()">
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+    </div>
+</form>
+
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped table-bordered table-hover">
@@ -24,8 +84,15 @@
                 <tr class="card-header">
                     <th class="card-title text-center">Code</th>
                     <th class="card-title text-center">Name</th>
+                    <th class="card-title text-center">Surface Type</th>
                     <th class="card-title text-center">Status</th>
-                    <th class="card-title text-center">Create Date</th>
+                    <th class="card-title text-center">Total Booking</th>
+                    <th class="card-title text-center">Opening Hours</th>
+                    <th class="card-title text-center">Close Hours</th>
+                    <th class="card-title text-center">Amentities</th>
+                    <th class="card-title text-center">Capacity</th>
+                    <th class="card-title text-center">Court type</th>
+                    <th class="card-title text-center w-1000">Create Date</th>
                     <th class="card-title text-center"></th>
                 </tr>
             </thead>
@@ -56,7 +123,8 @@
         </div>
     </div>
 </div>
-
+<nav id="paginationControls" aria-label="Page navigation" style="display: flex; justify-content: center; column-gap: 12px;">
+</nav>
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
@@ -69,7 +137,14 @@
                 // Proceed with AJAX request
                 var data = {
                     name: $("#Name").val(),
-                    status: $("#Status").val()
+                    status: $("#Status").val(),
+                    surfaceType: $("#SurfaceType").val(),
+                    openingHours: convertTimeToInt($("#OpeningHours").val()),
+                    closeHours: convertTimeToInt($("#CloseHours").val()),
+                    amentities: $("#Amentities").val(),
+                    capacity: $("#Capacity").val(),
+                    courtType: $("#CourtType").val(),
+
                 };
 
                 // AJAX request
@@ -94,11 +169,19 @@
                 });
             }
         ////////
-    }
+        }
 
-        function loadData() {
-
+        function loadData(pageIndex = 1, pageSize = 4) {
             var spin = document.getElementById('spinner-overlay');
+            var searchText = document.getElementById('searchInput').value === null ? "" : document.getElementById('searchInput').value;
+            console.log("searchInput" + searchText);
+            var searchMode = document.getElementById('modeSearch').value;
+            var statusFilter = document.getElementById('statusFilter').value;
+            var surfaceTypeFilter = document.getElementById('surfaceTypeFilter').value;
+            var courtType = document.getElementById('courtType').value;
+            var openingHours = document.getElementById('openingHours').value;
+            var closeHours = document.getElementById('closeHours').value;
+
             spin.classList.remove('invisible');
             const statusMap = {
                 1: 'Active',
@@ -106,31 +189,102 @@
                 3: 'Delete'
             };
 
+            const surfaceType = {
+                1: 'Wooden',
+                2: 'Synthetic',
+                3: 'Rubberized',
+                4: 'Concrete',
+                5: 'Vinyl'
+            };
+
+            const courtTypes = {
+                1: 'Single',
+                2: 'Double',
+                3: 'Both'
+            };
+
+
             $.ajax({
                 url: '@Url.Action("GetAll", "Court")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
+                data: {
+                    searchText: searchText,
+                    searchMode: searchMode,
+                    statusFilter: statusFilter,
+                    surfaceTypeFilter: surfaceTypeFilter,
+                    courtType: courtType,
+                    openingHours: convertTimeToInt(openingHours),
+                    closeHours: convertTimeToInt(closeHours),
+                    pageIndex: pageIndex,
+                    pageSize: pageSize
+                },
                 success: function (result) {
                     spin.classList.add('invisible');
                     var html = '';
-                    $.each(result, function (key, item) {
+                    $.each(result.list, function (key, item) {
                         //console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
                         html += '<td>' + item.name + '</td>';
+                        html += '<td>' + surfaceType[item.surfaceType] + '</td>';
                         html += '<td>' + statusMap[item.status] + '</td>';
+                        html += '<td>' + item.totalBooking + '</td>';
+                        html += '<td>' + convertIntTime(item.openingHours) + '</td>';
+                        html += '<td>' + convertIntTime(item.closeHours) + '</td>';
+                        html += '<td>' + item.amentities + '</td>';
+                        html += '<td>' + item.capacity + '</td>';
+                        html += '<td>' + courtTypes[item.courtType] + '</td>';
                         html += '<td>' + formatDateTime(item.createdDate) + '</td>';
-                        html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
+                        html += '<td class="text-center"><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button><button type="button" class="btn btn-outline-danger mt-2" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblTopUpList').html(html);
+                    generatePagination(result.pageIndex, result.totalOfPages);
                 },
                 error: function (xhr, error) {
-                    spin.classList.add('invisible');
                     alert(xhr.statusText);
+                    alert(`Something went wrong!`);
+                    spin.classList.add('invisible');
                 }
             });
+        }
+
+        function generatePagination(currentPage, totalPages) {
+            var paginationHtml = '';
+
+            if (currentPage > 1) {
+                paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + (currentPage - 1) + ')">Prev</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Prev</button>';
+            }
+
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<button class="btn btn-info">' + i + '</button>';
+                } else {
+                    paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + i + ')">' + i + '</button>';
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHtml += '<button class="btn btn-outline-secondary"  onclick="loadData(' + (currentPage + 1) + ')">Next</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Next</button>';
+            }
+
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function handleFilterChange() {
+            loadData();
+        }
+
+        function handleInputChange() {
+            loadData();
         }
 
         function add() {
@@ -183,7 +337,13 @@
                 var data = {
                     id: id,
                     name: $("#Name").val(),
-                    status: $("#Status").val()
+                    status: $("#Status").val(),
+                    surfaceType: $("#SurfaceType").val(),
+                    openingHours: convertTimeToInt($("#OpeningHours").val()),
+                    closeHours: convertTimeToInt($("#CloseHours").val()),
+                    amentities: $("#Amentities").val(),
+                    capacity: $("#Capacity").val(),
+                    courtType: $("#CourtType").val(),
                 };
 
 
@@ -242,6 +402,24 @@
             return formattedDateTime;
         }
 
+        function convertIntTime(hhmm) {
+            // Pad the number to ensure it is 4 digits
+            let timeString = hhmm.toString().padStart(4, '0');
+
+            // Extract hours and minutes
+            let hours = timeString.slice(0, 2);
+            let minutes = timeString.slice(2);
+
+            // Combine them in hh:mm format
+            return `${hours}:${minutes}`;
+        }
+
+        function convertTimeToInt(time) {
+            if (!time) return null;
+
+            var [hours, minutes] = time.split(':').map(Number);
+            return hours * 100 + minutes;
+        }
     </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
