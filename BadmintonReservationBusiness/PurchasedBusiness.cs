@@ -127,18 +127,16 @@ namespace BadmintonReservationBusiness
                     return new BusinessResult(-1, "No purchased data");
                 }
 
-                // Cập nhật các thuộc tính của PurchasedHoursMonthly
                 purchased.AmountHour = updatePurchasedRequest.AmountHour;
                 purchased.Status = updatePurchasedRequest.Status;
                 purchased.CustomerId = updatePurchasedRequest.CustomerId;
                 purchased.UpdatedDate = DateTime.Now;
-
-                // Truy xuất và cập nhật Payment nếu cần thiết
+          
                 var payment = await this.unitOfWork.PaymentRepository.GetByIdAsync(purchased.PaymentId);
                 if (payment != null)
                 {
                     payment.Amount = updatePurchasedRequest.AmountHour * 90000;
-                    payment.Status = 1; // Cập nhật trạng thái của payment nếu cần
+                    payment.Status = 1;
                     this.unitOfWork.PaymentRepository.Update(payment);
                 }
 
@@ -153,8 +151,6 @@ namespace BadmintonReservationBusiness
                 return new BusinessResult(-4, ex.Message);
             }
         }
-
-
 
         public async Task<IBusinessResult> RemovePurchased(int id)
         {

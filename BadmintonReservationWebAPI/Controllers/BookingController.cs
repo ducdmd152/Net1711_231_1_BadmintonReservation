@@ -1,6 +1,7 @@
 using BadmintonReservationBusiness;
-using BadmintonReservationData.DTOs;
+using BadmintonReservationData.DTO;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace BadmintonReservationWebAPI.Controllers
 {
@@ -16,11 +17,33 @@ namespace BadmintonReservationWebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            int pageIndex = 1,
+            int pageSize = 4,
+            string? searchText = "",
+            int status = 0,
+            int paymentType = 0,
+            int paymentStatus = 0,
+            int bookingType = 0,
+            DateTime? bookingDateFrom = null,
+            DateTime? bookingDateTo = null)
         {
-            var result = await _business.GetAllAsync();
+            var filterDTO = new BookingFilterDTO
+            {
+                SearchText = searchText ?? "",
+                Status = status,
+                PaymentType = paymentType,
+                PaymentStatus = paymentStatus,
+                BookingType = bookingType,
+                BookingDateFrom = bookingDateFrom,
+                BookingDateTo = bookingDateTo
+            };
+
+            var result = await _business.GetAllWithFilterWithDetailsAsync(pageIndex, pageSize, filterDTO);
             return GenerateActionResult(result);
         }
+
+
 
         [HttpGet]
         [Route("{id}")]

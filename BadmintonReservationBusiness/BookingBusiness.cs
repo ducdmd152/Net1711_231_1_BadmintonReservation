@@ -1,4 +1,5 @@
 ﻿using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using BadmintonReservationData.Enums;
 using System.Linq.Expressions;
@@ -19,6 +20,27 @@ namespace BadmintonReservationBusiness
             try
             {
                 var result = await this._unitOfWork.BookingRepository.GetAllWithDetailsAsync();
+
+                if (result == null)
+                {
+                    return new BusinessResult(404, "No booking data");
+                }
+                else
+                {
+                    return new BusinessResult(200, "Get booking list success", result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+
+        public async Task<IBusinessResult> GetAllWithFilterWithDetailsAsync(int pageIndex, int pageSize, BookingFilterDTO filterDTO)
+        {
+            try
+            {
+                var result = await this._unitOfWork.BookingRepository.GetAllWithFilterWithDetailsAsync(pageIndex, pageSize, filterDTO);
 
                 if (result == null)
                 {

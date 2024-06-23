@@ -1,5 +1,5 @@
 ﻿using BadmintonReservationData;
-using BadmintonReservationData.DTOs;
+using BadmintonReservationData.DTO;
 
 namespace BadmintonReservationWebApp.Models
 {

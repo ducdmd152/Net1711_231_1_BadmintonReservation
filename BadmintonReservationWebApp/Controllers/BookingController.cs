@@ -10,7 +10,7 @@ using BadmintonReservationBusiness;
 using Newtonsoft.Json;
 using System.Security.Policy;
 using System.Text;
-using BadmintonReservationData.DTOs;
+using BadmintonReservationData.DTO;
 using BadmintonReservationWebApp.Models;
 
 namespace BadmintonReservationWebApp.Controllers
@@ -110,19 +110,57 @@ namespace BadmintonReservationWebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Booking>> GetAll()
+        public async Task<PageableResponseDTO<Booking>> GetAll(
+            int pageIndex = 1,
+            int pageSize = 4,
+            string searchText = "",
+            int status = 0,
+            int paymentType = 0,
+            int paymentStatus = 0,
+            int bookingType = 0,
+            DateTime? bookingDateFrom = null,
+            DateTime? bookingDateTo = null)
         {
             try
             {
-                var result = new List<Booking>();
+                var result = new PageableResponseDTO<Booking>();
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.GetAsync($"{API_URL_ENDPOINT}Booking/"))
+                    var queryParams = new List<string>();
+
+                    queryParams.Add($"pageIndex={Uri.EscapeDataString(pageIndex.ToString())}");
+                    queryParams.Add($"pageSize={Uri.EscapeDataString(pageSize.ToString())}");
+
+                    if (!string.IsNullOrEmpty(searchText))
+                        queryParams.Add($"searchText={Uri.EscapeDataString(searchText)}");
+                    else
+                        queryParams.Add($"searchText={Uri.EscapeDataString("")}");
+
+                    if (status != 0)
+                        queryParams.Add($"status={status}");
+                    if (paymentType != 0)
+                        queryParams.Add($"paymentType={paymentType}");
+                    if (paymentStatus != 0)
+                        queryParams.Add($"paymentStatus={paymentStatus}");
+                    if (bookingType != 0)
+                        queryParams.Add($"bookingType={bookingType}");
+                    if (bookingDateFrom.HasValue)
+                        queryParams.Add($"bookingDateFrom={bookingDateFrom.Value.ToString("yyyy-MM-dd")}");
+                    if (bookingDateTo.HasValue)
+                        queryParams.Add($"bookingDateTo={bookingDateTo.Value.ToString("yyyy-MM-dd")}");
+
+                    var queryString = string.Join("&", queryParams);
+
+                    var requestUrl = $"{API_URL_ENDPOINT}Booking/";
+                    if (!string.IsNullOrEmpty(queryString))
+                        requestUrl = $"{requestUrl}?{queryString}";
+
+                    using (var response = await httpClient.GetAsync(requestUrl))
                     {
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<List<Booking>>(content);
+                            result = JsonConvert.DeserializeObject<PageableResponseDTO<Booking>>(content);
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-﻿namespace BadmintonReservationData.DTOs
+﻿namespace BadmintonReservationData.DTO
 {
     public class CreateBookingRequestDTO
     {
