@@ -120,5 +120,22 @@ namespace BadmintonReservationData.Repository
         {
             return this._dbSet.Where(x => x.CourtId == id).ToList();
         }
+
+        public async Task<Frame?> GetExistedFrame(int timeFrom, int timeTo, int courtId)
+        {
+            return await _dbSet.Where(
+                item => item.TimeFrom == timeFrom
+                        && item.TimeTo == timeTo
+                        && item.CourtId == courtId
+                        && item.Status != (int)FrameStatus.Delete
+                        )
+                        .Include(item => item.Court)
+                        .SingleOrDefaultAsync();
+        }
+
+        public List<Court> GetAllCourtWithFrameIds(List<int> ids)
+        {
+            return this._dbSet.Where(x => ids.Contains(x.Id)).Select(x => x.Court).ToList();
+        }
     }
 }

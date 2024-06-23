@@ -3,6 +3,7 @@ using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using BadmintonReservationData.Enums;
 using BadmintonReservationData.Repository;
+using BadmintonReservationWebApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,35 @@ namespace BadmintonReservationBusiness
             }
         }
 
+        public async Task<IBusinessResult> GetAllWithCondition(CourtSearchConditionDTO condition)
+        {
+            try
+            {
+                var paging = await this.unitOfWork.CourtRepository.GetAllWithCondition(condition);
+
+
+                if (paging.Courts == null)
+                {
+                    return new BusinessResult(400, "No court data");
+                }
+                else
+                {
+                    PageableResponseDTO<Court> result = new PageableResponseDTO<Court>
+                    {
+                        List = paging.Courts,
+                        PageIndex = condition.PageIndex,
+                        PageSize = condition.PageSize,
+                        TotalOfPages = paging.TotalItems
+                    };
+                    return new BusinessResult(200, "Get court list sucess", result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
+
         public async Task<IBusinessResult> GetById(int id)
         {
             try
@@ -70,6 +100,13 @@ namespace BadmintonReservationBusiness
                 {
                     Name = courtRequest.Name,
                     Status = courtRequest.Status,
+                    CloseHours = courtRequest.CloseHours,
+                    OpeningHours = courtRequest.OpeningHours,
+                    Capacity = courtRequest.Capacity,
+                    SurfaceType = courtRequest.SurfaceType,
+                    TotalBooking = "0",
+                    Amentities = courtRequest.Amentities,
+                    CourtType = courtRequest.CourtType,
                 };
 
                 await this.unitOfWork.CourtRepository.CreateAsync(court);
@@ -97,6 +134,13 @@ namespace BadmintonReservationBusiness
 
                 court.Name = courtRequest.Name;
                 court.Status = courtRequest.Status;
+                court.Amentities = courtRequest.Amentities;
+                court.Capacity = courtRequest.Capacity;
+                court.CourtType = courtRequest.CourtType;
+                court.SurfaceType = courtRequest.SurfaceType;
+                court.OpeningHours = courtRequest.OpeningHours;
+                court.CloseHours = courtRequest.CloseHours;
+
                 this.unitOfWork.CourtRepository.Update(court);
                 await this.unitOfWork.CommitTransactionAsync();
 

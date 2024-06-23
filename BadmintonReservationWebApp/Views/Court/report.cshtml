@@ -15,6 +15,22 @@
 
     };
 
+    var surfaceType = new Dictionary<int, string>
+    {
+        { 1, "Wooden" },
+        { 2, "Synthetic" },
+        { 3, "Rubberized" },
+        { 4, "Concrete" },
+        { 5, "Vinyl" },
+    };
+
+    var courtType = new Dictionary<int, string>
+    {
+        { 1, "Single" },
+        { 2, "Double" },
+        { 3, "Both" }
+    };
+
     var statusBadgeMap = new Dictionary<int, string>
     {
         { 1, "bg-warning text-dark" },   // Pending
@@ -97,15 +113,37 @@
             <dt class="col-sm-4">Court Id:</dt>
             <dd class="col-sm-8">@Model.Id</dd>
 
+            <dt class="col-sm-4">Court Status:</dt>
+            <dd class="col-sm-8">@courtStatus[@Model.Status]</dd>
+
+
+            <dt class="col-sm-4">Total Booking:</dt>
+            <dd class="col-sm-8">@Model.TotalBooking</dd>
+
+            <dt class="col-sm-4">Court Type:</dt>
+            <dd class="col-sm-8">@courtType[@Model.CourtType]</dd>
+
+            <dt class="col-sm-4">Court Opening:</dt>
+            <dd class="col-sm-8">@ConvertIntTime(Model.OpeningHours)</dd>
+
+            <dt class="col-sm-4">Court Amentities:</dt>
+            <dd class="col-sm-8">@Model.Amentities</dd>
+
+            <dt class="col-sm-4">Court Created:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.CreatedDate)</dd>
+        </div>
+        <div class="col-md-6 row">
             <dt class="col-sm-4">Court Name:</dt>
             <dd class="col-sm-8">@Model.Name</dd>
 
-            <dt class="col-sm-4">Court Status:</dt>
-            <dd class="col-sm-8">@courtStatus[@Model.Status]</dd>
-        </div>
-        <div class="col-md-6 row">
-            <dt class="col-sm-4">Court Created:</dt>
-            <dd class="col-sm-8">@FormatDateTime(@Model.CreatedDate)</dd>
+            <dt class="col-sm-4">Court Surface:</dt>
+            <dd class="col-sm-8">@surfaceType[@Model.SurfaceType]</dd>
+
+            <dt class="col-sm-4">Court Capacity:</dt>
+            <dd class="col-sm-8">@Model.Capacity</dd>
+
+            <dt class="col-sm-4">Court Close hours:</dt>
+            <dd class="col-sm-8">@ConvertIntTime(Model.CloseHours)</dd>
 
             <dt class="col-sm-4">Last Updated At:</dt>
             <dd class="col-sm-8">@FormatDateTime(@Model.UpdatedDate)</dd>

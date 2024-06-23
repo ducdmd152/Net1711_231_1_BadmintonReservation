@@ -61,11 +61,15 @@
             type: "GET",
             contentType: "application/json;charset=utf-8",
             dataType: "json",
+            data: {
+                pageIndex: 1,
+                pageSize: 1000
+            },
             success: function (result) {
                 // Clear previous options
                 $('#CourtId').empty();
                 // Add each court as an option to the dropdown list
-                $.each(result, function(key, item) {
+                $.each(result.list, function(key, item) {
                     $('#CourtId').append($('<option>', {
                         value: item.id,
                         text: item.name + ' | ' + item.amentities,
