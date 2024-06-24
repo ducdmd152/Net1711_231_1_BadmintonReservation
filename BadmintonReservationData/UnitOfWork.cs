@@ -27,7 +27,7 @@ namespace BadmintonReservationData
         private PaymentRepository _paymentRepository;
 
 
-      	private DateTypeRepository _dateTypeRespository;
+        private DateTypeRepository _dateTypeRespository;
       	
  	 	public UnitOfWork()
         {

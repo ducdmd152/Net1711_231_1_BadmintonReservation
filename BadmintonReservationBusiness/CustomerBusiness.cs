@@ -1,4 +1,5 @@
 ﻿using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,20 @@ namespace BadmintonReservationBusiness
             {
                 return new BusinessResult(500, ex.Message);
             }
-        }        
+        }
+
+        public BusinessResult LoginLogic(LoginDTO login)
+        {
+            var loginResult = this._unitOfWork.CustomerRepository.GetAccount(login.PhoneNumber, login.Password);
+            if (loginResult != null)
+            {
+                return new BusinessResult(200, "Login Success", loginResult);
+            }
+            else
+            {
+                return new BusinessResult(401, "Phone number or password fail", null);
+            }
+
+        }
     }
 }
