@@ -94,11 +94,14 @@
             <dt class="col-sm-4">Amount Hour:</dt>
             <dd class="col-sm-8">@Model.AmountHour</dd>
 
-            <dt class="col-sm-4">Status:</dt>
+            <dt class="col-sm-4">Status Purchased:</dt>
             <dd class="col-sm-8">@statusMap[@Model.Status]</dd>
 
             <dt class="col-sm-4">Customer Name:</dt>
             <dd class="col-sm-8">@Model.Customer.FullName</dd>
+
+            <dt class="col-sm-4">Phone Number:</dt>
+            <dd class="col-sm-8">@Model.Customer.PhoneNumber</dd>
         </div>
         <div class="col-md-6 row">
             <dt class="col-sm-4">Payment Amount:</dt>

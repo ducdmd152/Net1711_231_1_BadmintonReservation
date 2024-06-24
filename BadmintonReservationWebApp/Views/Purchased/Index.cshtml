@@ -20,9 +20,11 @@
                 <tr class="card-header">
                     <th class="card-title text-center">ID</th>
                     <th class="card-title text-center">Amount Hour</th>
-                    <th class="card-title text-center">Status</th>
-                    <th class="card-title text-center">Customer</th>
+                    <th class="card-title text-center">Status Purchased</th>
+                    <th class="card-title text-center">Customer Name</th>
+                    <th class="card-title text-center">Phone Number</th>
                     <th class="card-title text-center">Payment Amount</th>
+                    <th class="card-title text-center">Created Date</th>
                     <th class="card-title text-center">Last Updated Date</th>
                     <th class="card-title text-center"></th>
                 </tr>
@@ -84,7 +86,9 @@
                         html += '<td>' + item.amountHour + '</td>';
                         html += '<td>' + statusMap[item.status] + '</td>';
                         html += '<td>' + item.customer.fullName + '</td>';
+                        html += '<td>' + item.customer.phoneNumber + '</td>';
                         html += '<td>' + item.payment.amount + ' VND</td>';
+                        html += '<td>' + formatDateTime(item.createdDate) + '</td>';
                         html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
                         html += '<td><button type="button" class="btn btn-outline-primary" onclick ="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick ="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
                         html += '</tr>';

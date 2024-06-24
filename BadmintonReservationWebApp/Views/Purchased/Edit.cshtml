@@ -6,7 +6,7 @@
         @Html.EditorFor(model => model.AmountHour, new { htmlAttributes = new { @class = "form-control", @type = "number", @min = "0", @step = "0.1" } })
     </div>
     <div class="col-md-6">
-        <label for="Status">Status</label>
+        <label for="Status">Status Purchased</label>
         @Html.DropDownListFor(model => model.Status, new SelectList(new[] {
         new { Value = 1, Text = "Active" },
         new { Value = 2, Text = "Inactive" }
