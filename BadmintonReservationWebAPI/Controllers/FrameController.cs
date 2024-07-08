@@ -1,4 +1,5 @@
 using BadmintonReservationBusiness;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,24 @@ public class FrameController : ControllerBase
 
     [HttpGet]
     [Route("GetAll")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        int pageIndex = 1,
+        int pageSize = 2,
+        string? searchText = "",
+        double price = 0,
+        int status = 0,
+        int timeFrom = 0,
+        int timeTo = 0)
     {
-        var result = await _business.GetAll();
+        var filterDTO = new FrameFilterDTO()
+        {
+            SearchText = searchText ?? "",
+            FrameStatus = status,
+            Price = price,
+            TimeFrom = timeFrom,
+            TimeTo = timeTo
+        };
+        var result = await _business.GetAll(pageIndex, pageSize, filterDTO);
         switch (result.Status)
         {
             case 400:

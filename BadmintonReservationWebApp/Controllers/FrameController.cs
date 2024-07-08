@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using BadmintonReservationBusiness;
 using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using BadmintonReservationData.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -33,19 +34,52 @@ public class FrameController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        int pageIndex = 1,
+        int pageSize = 2,
+        string? searchText = "",
+        double price = 0,
+        int status = 0,
+        int timeFrom = 0,
+        int timeTo = 0)
     {
         try
         {
-            var result = new List<Frame>();
+            var result = new PageableResponseDTO<Frame>();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(API_URL_ENDPOINT + "/GetAll"))
+                var queryParams = new List<string>();
+
+                queryParams.Add($"pageIndex={Uri.EscapeDataString(pageIndex.ToString())}");
+                queryParams.Add($"pageSize={Uri.EscapeDataString(pageSize.ToString())}");
+
+                if (!string.IsNullOrEmpty(searchText))
+                    queryParams.Add($"searchText={Uri.EscapeDataString(searchText)}");
+                else
+                    queryParams.Add($"searchText={Uri.EscapeDataString("")}");
+
+
+                if (price != 0)
+                    queryParams.Add($"price={price}");
+                if (status != 0)
+                    queryParams.Add($"status={status}");
+                if (timeFrom != 0)
+                    queryParams.Add($"timeFrom={timeFrom}");
+                if (timeTo != 0)
+                    queryParams.Add($"timeTo={timeTo}");
+
+                var queryString = string.Join("&", queryParams);
+
+                var requestUrl = $"{API_URL_ENDPOINT}/GetAll";
+                if (!string.IsNullOrEmpty(queryString))
+                    requestUrl = $"{requestUrl}?{queryString}";
+
+                using (var response = await httpClient.GetAsync(requestUrl))
                 {
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        result = JsonConvert.DeserializeObject<List<Frame>>(content);
+                        result = JsonConvert.DeserializeObject<PageableResponseDTO<Frame>>(content);
                         return Ok(result);
                     }
                     else
@@ -116,8 +150,13 @@ public class FrameController : Controller
                         result = new UpdateFrameRequestDTO()
                         {
                             Id = frameResponse.Id,
+                            Label = frameResponse.Label,
+                            Note = frameResponse.Note,
                             TimeFrom = TimeConverter.ConvertToTimeSpan(frameResponse.TimeFrom),
                             TimeTo = TimeConverter.ConvertToTimeSpan(frameResponse.TimeTo),
+                            OldTimeFrom = frameResponse.TimeFrom,
+                            OldTimeTo = frameResponse.TimeTo,
+                            OldCourtId = frameResponse.CourtId,
                             Price = frameResponse.Price,
                             CourtId = frameResponse.CourtId,
                             Status = frameResponse.Status

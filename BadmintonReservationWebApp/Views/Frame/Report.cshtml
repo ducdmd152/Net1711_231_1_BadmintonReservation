@@ -83,12 +83,15 @@
         }
 </style>
 <div class="container">
-    <h3 class="header-text">Booking Report #@Model.Id <span class="badge @statusBadgeMap[@Model.Status]" style="font-size: 14px;">@statusMap[@Model.Status]</span> </h3>
+    <h3 class="header-text">Frame Report #@Model.Id <span class="badge @statusBadgeMap[@Model.Status]" style="font-size: 14px;">@statusMap[@Model.Status]</span> </h3>
     <div class="header-line">
     </div>
 
     <dl class="row details mt-3">
         <div class="col-md-6 row">
+            <dt class="col-sm-4">Label:</dt>
+            <dd class="col-sm-8">@Model.Label</dd>
+
             <dt class="col-sm-4">Time From:</dt>
             <dd class="col-sm-8">@ConvertIntTime(@Model.TimeFrom)</dd>
 
@@ -99,6 +102,9 @@
             <dd class="col-sm-8">@FormatPriceVND(@Model.Price)</dd>
         </div>
         <div class="col-md-6 row">
+            <dt class="col-sm-4">Note:</dt>
+            <dd class="col-sm-8">@Model.Note</dd>
+
             <dt class="col-sm-4">Court Name:</dt>
             <dd class="col-sm-8">@Model.Court.Name</dd>
 
