@@ -1,5 +1,6 @@
 ﻿
 using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,45 @@ namespace BadmintonReservationBusiness
             }
         }
 
+        public async Task<IBusinessResult> GetAllWithFilterWithAsync(int pageIndex, int pageSize, PurchasedFilterDTO filterDTO)
+        {
+            try
+            {
+                var result = await this.unitOfWork.PurchasedRepository.GetAllWithFilterWithAsync(pageIndex, pageSize, filterDTO);
+
+                if (result == null)
+                {
+                    return new BusinessResult(404, "No purchased data");
+                }
+                else
+                {
+                    var list = result.List.Select(x => {
+                        var cus = x.Customer;
+                        cus.PurchasedHoursMonthlies = null;
+                        var pay = x.Payment;
+                        pay.PurchasedHoursMonthlies = null;
+                        return new PurchasedHoursMonthly
+                        {
+                            Id = x.Id,
+                            CustomerId = x.CustomerId,
+                            PaymentId = x.PaymentId,
+                            AmountHour = x.AmountHour,
+                            Status = x.Status,
+                            CreatedDate = x.CreatedDate,
+                            UpdatedDate = x.UpdatedDate,
+                            Customer = cus,
+                            Payment = pay
+                        };
+                    }).ToList();
+                    result.List = list;
+                    return new BusinessResult(200, "Get purchased list success", result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(500, ex.Message);
+            }
+        }
         public async Task<IBusinessResult> GetPurchasedById(int id)
         {
             try

@@ -1,4 +1,5 @@
 ﻿using BadmintonReservationData;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -51,29 +52,86 @@ public class PurchasedController : Controller
         }
     }
 
+    //[HttpGet]
+    //public async Task<List<PurchasedHoursMonthly>> GetAll()
+    //{
+    //    try
+    //    {
+    //        var result = new List<PurchasedHoursMonthly>();
+    //        using (var httpClient = new HttpClient())
+    //        {
+    //            using (var response = await httpClient.GetAsync(API_URL_ENDPOINT + "/GetAll"))
+    //            {
+    //                if (response.IsSuccessStatusCode)
+    //                {
+    //                    var content = await response.Content.ReadAsStringAsync();
+    //                    result = JsonConvert.DeserializeObject<List<PurchasedHoursMonthly>>(content);
+    //                }
+    //            }
+    //        }
+
+    //        return result;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
+
     [HttpGet]
-    public async Task<List<PurchasedHoursMonthly>> GetAll()
+    public async Task<IActionResult> GetAll(
+        int pageIndex = 1,
+        int pageSize = 4,
+        string? searchText = "",
+        int status = 0,
+        int amountHour = 0)
     {
         try
         {
-            var result = new List<PurchasedHoursMonthly>();
+            var result = new PageableResponseDTO<PurchasedHoursMonthly>();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(API_URL_ENDPOINT + "/GetAll"))
+                var queryParams = new List<string>();
+
+                queryParams.Add($"pageIndex={Uri.EscapeDataString(pageIndex.ToString())}");
+                queryParams.Add($"pageSize={Uri.EscapeDataString(pageSize.ToString())}");
+
+                if (!string.IsNullOrEmpty(searchText))
+                    queryParams.Add($"searchText={Uri.EscapeDataString(searchText)}");
+                else
+                    queryParams.Add($"searchText={Uri.EscapeDataString("")}");
+
+
+                if (amountHour != 0)
+                    queryParams.Add($"amountHour={amountHour}");
+                if (status != 0)
+                    queryParams.Add($"status={status}");
+
+                var queryString = string.Join("&", queryParams);
+
+                var requestUrl = $"{API_URL_ENDPOINT}/GetAll";
+                if (!string.IsNullOrEmpty(queryString))
+                    requestUrl = $"{requestUrl}?{queryString}";
+
+                using (var response = await httpClient.GetAsync(requestUrl))
                 {
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        result = JsonConvert.DeserializeObject<List<PurchasedHoursMonthly>>(content);
+                        result = JsonConvert.DeserializeObject<PageableResponseDTO<PurchasedHoursMonthly>>(content);
+                        return Ok(result);
+                    }
+                    else
+                    {
+                        var errorMessage = $"Request failed with status code: {response.StatusCode} and reason: {response.ReasonPhrase}";
+                        return StatusCode((int)response.StatusCode, errorMessage);
                     }
                 }
             }
-
-            return result;
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 

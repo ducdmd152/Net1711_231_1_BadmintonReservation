@@ -13,6 +13,30 @@
     </div>
 </div>
 
+<form id="filterForm" class="d-flex flex-column mb-3 rounded" style="flex: 1; width: 100%; margin-right: 10px;" method="GET">
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+        <input type="text" style="flex: 1; padding: 8px;" class="search-input" id="searchInput" name="search" placeholder="Search..." value="" onchange="handleInputChange()">
+        <button class="btn-primary p-2" type="submit">Search</button>
+    </div>
+    <div class="d-flex justify-content-center align-items-center mb-3 gap-3 rounded" style="width: 100%;">
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="amountHour">Amount Hour</label>
+            <input type="number" min="0" id="amountHour" class="form-control" onchange="handleFilterChange()">
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label>Purchased Status</label>
+            <select id="purchasedStatusFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0" selected>All</option>
+                <option value="1">Active</option>
+                <option value="2">InActive</option>
+            </select>
+        </div>
+    </div>
+    <span class="text-danger" id="TimeError"></span>
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+    </div>
+</form>
+
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped table-bordered table-hover">
@@ -56,21 +80,47 @@
         </div>
     </div>
 </div>
+
+<nav id="paginationControls" aria-label="Page navigation" style="display: flex; justify-content: center; column-gap: 12px;">
+</nav>
+
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
             loadData();
         });
 
-        function loadData() {
+        document.getElementById('filterForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Ngăn chặn việc gửi form
+        });
 
+        function handleInputChange() {
+            loadData();
+        }
+
+        function handleFilterChange() {
+            loadData();
+        }
+
+        function loadData(pageIndex = 1, pageSize = 4) {
             var spin = document.getElementById('spinner-overlay');
+            var spin = document.getElementById('spinner-overlay');
+            var searchText = document.getElementById('searchInput').value;
+            var amountHour = document.getElementById('amountHour').value;
+            var purchasedStatusFilter = document.getElementById('purchasedStatusFilter').value;
             spin.classList.remove('invisible');
             $.ajax({
                 url: '@Url.Action("GetAll", "Purchased")',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
+                data: {
+                    searchText: searchText,
+                    amountHour: amountHour,
+                    status: purchasedStatusFilter,
+                    pageIndex: pageIndex,
+                    pageSize: pageSize
+                },
                 success: function (result) {
                     spin.classList.add('invisible');
                     const statusMap = {
@@ -79,7 +129,7 @@
                     };
                     var html = '';
                     // console.log(result);
-                    $.each(result, function (key, item) {
+                    $.each(result.list, function (key, item) {
                         console.log(item);
                         html += '<tr>';
                         html += '<td>' + item.id + '</td>';
@@ -94,6 +144,7 @@
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
+                    generatePagination(result.pageIndex, result.totalOfPages);
                 },
                 error: function (xhr, error) {
                     spin.classList.add('invisible');
@@ -101,6 +152,34 @@
                     alert(`Something went wrong!`);
                 }
             });
+        }
+
+        function generatePagination(currentPage, totalPages) {
+            var paginationHtml = '';
+
+            if (currentPage > 1) {
+                paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + (currentPage - 1) + ')">Prev</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Prev</button>';
+            }
+
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<button class="btn btn-info">' + i + '</button>';
+                } else {
+                    paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + i + ')">' + i + '</button>';
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHtml += '<button class="btn btn-outline-secondary"  onclick="loadData(' + (currentPage + 1) + ')">Next</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Next</button>';
+            }
+
+            $('#paginationControls').html(paginationHtml);
         }
 
         function add() {
