@@ -1,4 +1,5 @@
 using BadmintonReservationBusiness;
+using BadmintonReservationData.DTO;
 using BadmintonReservationData.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,8 @@ namespace BadmintonReservationWebAPI.Controllers
         {
             switch (result.Status)
             {
+                case 401:
+                    return Unauthorized();
                 case 400:
                     return BadRequest(result);
                 case 404:
@@ -37,6 +40,13 @@ namespace BadmintonReservationWebAPI.Controllers
                 default:
                     return StatusCode(500, "An internal server error occurred. Please try again later.");
             }
+        }
+
+        [HttpPost("Login")]
+        public IActionResult Login(LoginDTO login)
+        {
+            var result = _business.LoginLogic(login);
+            return GenerateActionResult(result);
         }
     }
 }

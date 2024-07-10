@@ -59,7 +59,7 @@ namespace BadmintonReservationBusiness
                         List = paging.Courts,
                         PageIndex = condition.PageIndex,
                         PageSize = condition.PageSize,
-                        TotalOfPages = paging.TotalItems
+                        TotalOfPages = (int)Math.Ceiling((paging.TotalItems * 1.0) / (condition.PageSize * 1.0))
                     };
                     return new BusinessResult(200, "Get court list sucess", result);
                 }

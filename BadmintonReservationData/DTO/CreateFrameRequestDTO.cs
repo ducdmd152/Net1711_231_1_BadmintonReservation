@@ -4,6 +4,10 @@ namespace BadmintonReservationData.DTOs;
 
 public class CreateFrameRequestDTO
 {
+    [Required(ErrorMessage = "Label is required")]
+    public string Label { get; set; }
+    [Required(ErrorMessage = "Note is required")]
+    public string Note { get; set; }
     [Required(ErrorMessage = "Time From is required")]
     public int TimeFrom { get; set; }
 
