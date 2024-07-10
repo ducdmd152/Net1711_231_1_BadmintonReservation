@@ -101,6 +101,7 @@
         function handleFilterChange() {
             loadData();
         }
+
         function loadData(pageIndex = 1, pageSize = 4) {
             var spin = document.getElementById('spinner-overlay');
             var spin = document.getElementById('spinner-overlay');
@@ -143,6 +144,7 @@
                         html += '</tr>';
                     });
                     $('.tblList').html(html);
+                    generatePagination(result.pageIndex, result.totalOfPages);
                 },
                 error: function (xhr, error) {
                     spin.classList.add('invisible');
