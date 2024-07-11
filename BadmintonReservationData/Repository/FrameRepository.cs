@@ -35,10 +35,10 @@ namespace BadmintonReservationData.Repository
         {
             var query = _dbSet
                 .Include(item => item.Court)
-                .Where(item => item.Id.ToString().Contains(filterDTO.SearchText)
-                        || item.Label.ToLower().Contains(filterDTO.SearchText.ToLower())
-                        || item.Note.ToLower().Contains(filterDTO.SearchText.ToLower())
-                        || item.Court.Name.ToLower().Contains(filterDTO.SearchText.ToLower())
+                .Where(item => item.Id.ToString().Contains(filterDTO.SearchText.Trim())
+                        || item.Label.ToLower().Contains(filterDTO.SearchText.Trim().ToLower())
+                        || item.Note.ToLower().Contains(filterDTO.SearchText.Trim().ToLower())
+                        || item.Court.Name.ToLower().Contains(filterDTO.SearchText.Trim().ToLower())
                 )
                 .Where(item => item.Price >= filterDTO.Price)
                 .Where(item => filterDTO.FrameStatus == 0 || item.Status == filterDTO.FrameStatus)
