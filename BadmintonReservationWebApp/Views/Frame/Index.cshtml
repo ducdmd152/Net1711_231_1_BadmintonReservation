@@ -1,0 +1,455 @@
+﻿@{
+    ViewData["Title"] = "Frame";
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h2 class="display-8">Frame List</h2>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+
+<form id="filterForm" class="d-flex flex-column mb-3 rounded" style="flex: 1; width: 100%; margin-right: 10px;" method="GET">
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+        <input type="text" style="flex: 1; padding: 8px;" class="search-input" id="searchInput" name="search" placeholder="Search by label, note, court name" value="" onchange="handleInputChange()">
+        <button class="btn-primary p-2" type="submit">Search</button>
+    </div>
+    <div class="d-flex justify-content-center align-items-center mb-3 gap-3 rounded" style="width: 100%;">
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="framePrice">Price</label>
+            <input type="number" min="0" id="framePrice" class="form-control" onchange="handleFilterChange()">
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label>Frame Status</label>
+            <select id="frameStatusFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0" selected>All</option>
+                <option value="1">Active</option>
+                <option value="2">InActive</option>
+            </select>
+        </div>
+
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="frameFrom">Time From</label>
+            <input type="time" id="frameFrom" class="form-control" onchange="handleFilterChange()">
+        </div>
+
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="frameTo">Time To</label>
+            <input type="time" id="frameTo" class="form-control" onchange="handleFilterChange()">
+        </div>
+    </div>
+    <span class="text-danger" id="TimeError"></span>
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+            <tr class="card-header">
+                <th class="card-title text-center">ID</th>
+                <th class="card-title text-center">Label</th>
+                <th class="card-title text-center">Note</th>
+                <th class="card-title text-center">Time From</th>
+                <th class="card-title text-center">Time To</th>
+                <th class="card-title text-center">Status</th>
+                <th class="card-title text-center">Price</th>
+                <th class="card-title text-center">Court Name</th>
+                <th class="card-title text-center">Last Updated Date</th>
+                <th class="card-title text-center"></th>
+            </tr>
+            </thead>
+            <tbody class="tblList">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="topUpModal" tabindex="-1" aria-labelledby="topUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="topUpModalLabel">Topup Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="topUpModalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<nav id="paginationControls" aria-label="Page navigation" style="display: flex; justify-content: center; column-gap: 12px;">
+</nav>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+
+        document.getElementById('filterForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Ngăn chặn việc gửi form
+        });
+
+        function handleInputChange() {
+            loadData();
+        }
+
+        function handleFilterChange() {
+            loadData();
+        }
+
+        function loadData(pageIndex = 1, pageSize = 2) {
+
+            var spin = document.getElementById('spinner-overlay');
+            var searchText = document.getElementById('searchInput').value;
+            var framePrice = document.getElementById('framePrice').value;
+            var frameStatusFilter = document.getElementById('frameStatusFilter').value;
+            var frameFrom = document.getElementById('frameFrom').value;
+            var frameTo = document.getElementById('frameTo').value;
+            if (frameFrom == '') {
+                frameFrom = '00:00';
+            }
+            if (frameTo == '') {
+                frameTo = '23:59';
+            }
+            // Convert time strings to Date objects
+            var timeFromDate = new Date("2000-01-01T" + frameFrom);
+            var timeToDate = new Date("2000-01-01T" + frameTo);
+            console.log(timeFromDate);
+            console.log(timeToDate);
+            if (timeFromDate <= timeToDate) {
+                document.getElementById("TimeError").innerText = "";
+                // Ensure the times are formatted as "hh:mm:ss"
+                var timeFromParts = frameFrom.split(':');
+                var timeToParts = frameTo.split(':');
+
+                // Convert each part to an integer to remove leading zeros, using base 10
+                var timeFromHour = parseInt(timeFromParts[0], 10);
+                var timeFromMinute = timeFromParts[1];
+                var timeToHour = parseInt(timeToParts[0], 10);
+                var timeToMinute = timeToParts[1];
+
+                // Combine the parts back into formatted strings
+                var timeFromFormatted = parseInt(timeFromHour.toString() + timeFromMinute.toString(), 10);
+                var timeToFormatted = parseInt(timeToHour.toString() + timeToMinute.toString(), 10);
+
+                spin.classList.remove('invisible');
+                $.ajax({
+                    url: '@Url.Action("GetAll", "Frame")',
+                    type: "GET",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        searchText: searchText,
+                        price: framePrice,
+                        status: frameStatusFilter,
+                        timeFrom: timeFromFormatted,
+                        timeTo: timeToFormatted,
+                        pageIndex: pageIndex,
+                        pageSize: pageSize
+                    },
+                    success: function (result) {
+                        spin.classList.add('invisible');
+                        const statusMap = {
+                            1: 'Active',
+                            2: 'InActive'
+                        };
+                        var html = '';
+                        // console.log(result);
+                        $.each(result.list, function (key, item) {
+                            console.log(item);
+                            html += '<tr>';
+                            html += '<td>' + item.id + '</td>';
+                            html += '<td>' + item.label + '</td>';
+                            html += '<td>' + item.note + '</td>';
+                            html += '<td>' + convertIntTime(item.timeFrom) + '</td>';
+                            html += '<td>' + convertIntTime(item.timeTo) + '</td>';
+                            html += '<td>' + statusMap[item.status] + '</td>';
+                            html += '<td>' + formatPrice(item.price) + ' VNĐ' + '</td>';
+                            html += '<td>' + item.court.name + ' | ' + item.court.amentities + '</td>';
+                            html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
+                            html += '<td class="text-center align-middle">';
+                            html += '<button type="button" class="btn btn-outline-primary my-2 me-2" onclick="return edit(\'' + item.id + '\')">Edit</button>';
+                            html += '<button type="button" class="btn btn-outline-info my-2 me-2" onclick="redirectToReport(\'' + item.id + '\')">Report</button>';
+                            html += '<button type="button" class="btn btn-outline-danger my-2" onclick="return deleteItem(\'' + item.id + '\')">Delete</button>';
+                            html += '</td>';
+                            html += '</tr>';
+                        });
+                        $('.tblList').html(html);
+
+                        // Generate pagination controls
+                        generatePagination(result.pageIndex, result.totalOfPages);
+                    },
+                    error: function (xhr, error) {
+                        spin.classList.add('invisible');
+                        alert(xhr.statusText);
+                        alert(`Something went wrong!`);
+                    }
+                });
+            } else {
+                // Show error message
+                document.getElementById("TimeError").innerText = "Time To must be greater than Time From.";
+            }
+        }
+
+        function generatePagination(currentPage, totalPages) {
+            var paginationHtml = '';
+
+            if (currentPage > 1) {
+                paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + (currentPage - 1) + ')">Prev</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Prev</button>';
+            }
+
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<button class="btn btn-info">' + i + '</button>';
+                } else {
+                    paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + i + ')">' + i + '</button>';
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHtml += '<button class="btn btn-outline-secondary"  onclick="loadData(' + (currentPage + 1) + ')">Next</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Next</button>';
+            }
+
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function convertIntTime(hhmm) {
+            // Pad the number to ensure it is 4 digits
+            let timeString = hhmm.toString().padStart(4, '0');
+
+            // Extract hours and minutes
+            let hours = timeString.slice(0, 2);
+            let minutes = timeString.slice(2);
+
+            // Combine them in hh:mm format
+            return `${hours}:${minutes}`;
+        }
+
+        function formatDateTime(dateTimeString, format) {
+            var dateTime = new Date(dateTimeString);
+                var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
+            return formattedDateTime;
+        }
+
+        function formatPrice(price) {
+            return price.toLocaleString('de-DE');
+        }
+
+
+
+        function add() {
+            $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html("Add New");
+
+            $.ajax({
+                url: '@Url.Action("Add", "Frame")',
+                type: "GET",
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+
+                    $("#btSave").off("click").on("click", function () {
+                        create();
+                    });
+                },
+                error: function (message) {
+                    alert(message);
+                }
+            });
+        }
+
+    function create() {
+        // Manually trigger validation
+        if ($('#frm').valid()) {
+            // Get values from form
+            var timeFrom = $("#TimeFrom").val();
+            var timeTo = $("#TimeTo").val();
+
+            // Convert time strings to Date objects
+            var timeFromDate = new Date("2000-01-01T" + timeFrom);
+            var timeToDate = new Date("2000-01-01T" + timeTo);
+
+            // Check if TimeFrom is less than TimeTo
+            if (timeFromDate < timeToDate) {
+                // Ensure the times are formatted as "hh:mm:ss"
+                var timeFromParts = timeFrom.split(':');
+                var timeToParts = timeTo.split(':');
+
+                // Convert each part to an integer to remove leading zeros, using base 10
+                var timeFromHour = parseInt(timeFromParts[0], 10);
+                var timeFromMinute = timeFromParts[1];
+                var timeToHour = parseInt(timeToParts[0], 10);
+                var timeToMinute = timeToParts[1];
+
+                // Combine the parts back into formatted strings
+                var timeFromFormatted = parseInt(timeFromHour.toString() + timeFromMinute.toString(), 10);
+                var timeToFormatted = parseInt(timeToHour.toString() + timeToMinute.toString(), 10);
+                // Proceed with AJAX request
+                var data = {
+                    label: $("#Label").val(),
+                    note: $("#Note").val(),
+                    timeFrom: timeFromFormatted,
+                    timeTo: timeToFormatted,
+                    status: $("#Status").val(),
+                    price: $("#Price").val(),
+                    courtId: $("#CourtId").val(),
+                };
+
+                // AJAX request
+                console.log(data);
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Create", "Frame")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        if (result.status >= 1) {
+                            $('#topUpModal').modal('hide');
+                            loadData();
+                        }
+                        alert("Created new frame successfully!");
+                    },
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong: ${xhr.responseText}`);
+                    }
+                });
+            } else {
+                // Show error message
+                $("#TimeTo").siblings(".text-danger").text("Time To must be greater than Time From.");
+            }
+        }
+    }
+
+    function deleteItem(id) {
+        var result = confirm(`Are you sure to delete frame ${id}?`);
+        if (result) {
+            $.ajax({
+                url: '@Url.Action("Delete", "Frame")' + '/' + id,
+                type: 'DELETE',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                    success: function (result) {
+                        loadData();
+                        alert(`Deleted frame ${id} successfully!`);
+                    },
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong!`);
+                    }
+            });
+        }
+    }
+
+    function edit(id) {
+        $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html(`Edit booking [${id}]`);
+            $.ajax({
+                url: '@Url.Action("Edit", "Frame")' + '/' + id,
+                type: "GET",
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+
+                    $("#btSave").off("click").on("click", function () {
+                        update(id);
+                    });
+                },
+                error: function (message) {
+                    alert(message);
+                }
+        });
+    }
+
+    function update(id) {
+        // Manually trigger validation
+        if ($('#frm').valid()) {
+            // Get values from form
+            var timeFrom = $("#TimeFrom").val();
+            var timeTo = $("#TimeTo").val();
+            var oldTimeFrom = $("#OldTimeFrom").val();
+            var oldTimeTo = $("#OldTimeTo").val();
+            var oldCourtId = $("#OldCourtId").val();
+            // Convert time strings to Date objects
+            var timeFromDate = new Date("2000-01-01T" + timeFrom);
+            var timeToDate = new Date("2000-01-01T" + timeTo);
+
+            // Check if TimeFrom is less than TimeTo
+            if (timeFromDate < timeToDate) {
+                // Ensure the times are formatted as "hh:mm:ss"
+                var timeFromParts = timeFrom.split(':');
+                var timeToParts = timeTo.split(':');
+
+                var timeFromFormatted = timeFromParts[0].padStart(2, '0') + ':' + timeFromParts[1].padStart(2, '0') + ':00';
+                var timeToFormatted = timeToParts[0].padStart(2, '0') + ':' + timeToParts[1].padStart(2, '0') + ':00';
+                // Proceed with AJAX request
+                var data = {
+                    id: id,
+                    label: $("#Label").val(),
+                    note: $("#Note").val(),
+                    timeFrom: timeFromFormatted,
+                    timeTo: timeToFormatted,
+                    oldTimeFrom: oldTimeFrom,
+                    oldTimeTo: oldTimeTo,
+                    oldCourtId: oldCourtId,
+                    status: $("#Status").val(),
+                    price: $("#Price").val(),
+                    courtId: $("#CourtId").val(),
+                };
+
+                // AJAX request
+                console.log(data);
+                $.ajax({
+                    type: 'PUT',
+                    url: '@Url.Action("Update", "Frame")',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        if (result.status >= 1) {
+                            $('#topUpModal').modal('hide');
+                            loadData();
+                        }
+                        alert(`Update frame ${id} successfully!`);
+                    },
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong: ${xhr.responseText}`);
+                    }
+                });
+            } else {
+                // Show error message
+                $("#TimeTo").siblings(".text-danger").text("Time To must be greater than Time From.");
+            }
+        }
+    }
+
+    function redirectToReport(id) {
+            var url = '/Frame/report/' + id;
+            window.location.href = url;
+    }
+
+    </script>
+}

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using BadmintonReservationData.Entity;
+using System;
 using System.Collections.Generic;
 
 namespace BadmintonReservationData
 {
-    public partial class Payment
+    public partial class Payment : BaseEntity
     {
         public Payment()
         {
-            Bookings = new HashSet<Booking>();
             PurchasedHoursMonthlies = new HashSet<PurchasedHoursMonthly>();
         }
 
@@ -16,10 +16,7 @@ namespace BadmintonReservationData
         public int Status { get; set; }
         public int? ThirdPartyPaymentId { get; set; }
         public int? ThirdPartyResponse { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
 
-        public virtual ICollection<Booking> Bookings { get; set; }
         public virtual ICollection<PurchasedHoursMonthly> PurchasedHoursMonthlies { get; set; }
     }
 }

@@ -1,0 +1,178 @@
+﻿@model BadmintonReservationData.Booking
+@{
+    ViewData["Title"] = "Booking Report #" + Model.Id;
+    var bookingDetails = Model.BookingDetails.ToList();
+    var lastTotal = Math.Max(0, bookingDetails.Sum(item => item.Price) - Model.PromotionAmount);
+    var statusMap = new Dictionary<int, string>
+    {
+        { 1, "Pending" },
+        { 2, "Successful" },
+        { 3, "Failed" },
+        { 4, "Cancelled" }
+    };
+    var statusBadgeMap = new Dictionary<int, string>
+    {
+        { 1, "bg-warning text-dark" },   // Pending
+        { 2, "bg-success" },             // Successful
+        { 3, "bg-danger" },              // Failed
+        { 4, "bg-secondary" }            // Cancelled
+    };
+
+    var paymentTypeMap = new Dictionary<int, string>
+    {
+        { 1, "Offline" },
+        { 2, "Online" }
+    };
+
+    var paymentStatusMap = new Dictionary<int, string>
+    {
+        { 1, "Not yet" },
+        { 2, "Paid" },
+        { 3, "Fail" },
+        { 4, "Refund" }
+    };
+
+    var bookingTypeMap = new Dictionary<int, string>
+    {
+        { 1, "Normal" },
+        { 2, "Monthly" },
+        { 5, "Hourly" }
+    };
+
+    string ConvertIntTime(int hhmm)
+    {
+        string timeString = hhmm.ToString().PadLeft(4, '0');
+        string hours = timeString.Substring(0, 2);
+        string minutes = timeString.Substring(2, 2);
+        return $"{hours}:{minutes}";
+    }
+
+    string FormatDate(DateTime date)
+    {
+        return date.ToString("dddd, dd-MM-yyyy");
+    }
+
+        string FormatDateTime(DateTime date)
+        {
+            return date.ToString("dddd, dd-MM-yyyy HH:mm");
+        }
+}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .header-text {
+        color: #0188A6;
+        font-weight: 600;
+    }
+    .header-line {
+        background-color: #00a6BD4E;
+        padding: 20px;
+        color: white;
+        font-size: 24px;
+    }
+
+    .header-text {
+        display: flex;
+        align-items: center;
+    }
+
+        .header-text .badge {
+            margin-left: 10px;
+        }
+
+    .details, .details dt, .details dd {
+        font-size: 18px;
+    }
+
+        .details dt {
+            font-weight: bold;
+        }
+
+        .details dd {
+            margin: 0 0 10px;
+        }
+
+    .table {
+        margin-top: 20px;
+    }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+</style>
+<div class="container">
+    <h3 class="header-text">Booking Report #@Model.Id <span class="badge @statusBadgeMap[@Model.Status]" style="font-size: 14px;">@statusMap[@Model.Status]</span> </h3>
+    <div class="header-line">
+    </div>
+
+    <dl class="row details mt-3">
+        <div class="col-md-6 row">
+            <dt class="col-sm-4">Customer:</dt>
+            <dd class="col-sm-8">@Model.Customer.FullName</dd>
+
+            <dt class="col-sm-4">Contact:</dt>
+            <dd class="col-sm-8">@Model.Customer.PhoneNumber</dd>
+
+            <dt class="col-sm-4">Booking Type:</dt>
+            <dd class="col-sm-8">@Model.BookingType.Name</dd>
+
+            <dt class="col-sm-4">Promotion Amt:</dt>
+            <dd class="col-sm-8">@Model.PromotionAmount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</dd>
+        </div>
+        <div class="col-md-6 row">
+            <dt class="col-sm-4">Booking Created:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.CreatedDate)</dd>
+
+            <dt class="col-sm-4">Last Updated At:</dt>
+            <dd class="col-sm-8">@FormatDateTime(@Model.UpdatedDate)</dd>
+
+            <dt class="col-sm-4">Payment Type:</dt>
+            <dd class="col-sm-8">@paymentTypeMap[@Model.PaymentType]</dd>
+
+            <dt class="col-sm-4">Payment Status:</dt>
+            <dd class="col-sm-8">@paymentStatusMap[@Model.PaymentStatus]</dd>
+        </div>
+    </dl>
+
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Booking Date</th>
+                <th>Court</th>
+                <th>Frame Time</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < bookingDetails.Count; i++)
+            {
+                <tr>
+                    <th scope="row">@(i+1)</th>
+                    <td>@FormatDate(bookingDetails[i].BookDate)</td>
+                    <td>@bookingDetails[i].Frame.Court.Name</td>
+                    <td>@ConvertIntTime(bookingDetails[i].Frame.TimeFrom) - @ConvertIntTime(bookingDetails[i].Frame.TimeTo)</td>
+                    <td>@bookingDetails[i].Price.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+                </tr>
+            }
+            <tr style="font-weight: 600;">
+                <td colspan="3"></td>
+                <td colspan="1">Total of detailts</td>                
+                <td colspan="1">@bookingDetails.Sum(item => item.Price).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            </tr>
+            <tr style="font-weight: 600;">
+                <td colspan="3"></td>
+                <td colspan="1">Promotion Amount</td>
+                <td colspan="1">@Model.PromotionAmount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            </tr>
+            <tr style="font-weight: 600;">
+                <td colspan="3"></td>
+                <td colspan="1">Total for Payment</td>
+                <td colspan="1">@lastTotal.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

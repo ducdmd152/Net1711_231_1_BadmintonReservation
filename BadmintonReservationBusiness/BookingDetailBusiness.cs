@@ -1,5 +1,4 @@
 ﻿using BadmintonReservationData;
-using BadmintonReservationData.DAO;
 using BadmintonReservationData.DTOs;
 using System.Linq.Expressions;
 
@@ -37,8 +36,9 @@ namespace BadmintonReservationBusiness
 
         public async Task<IBusinessResult> UpdateBookingDetailAsync(int id, UpdateBookingDetailRequestDTO updateRequest)
         {
+            
             try
-            {
+            {                
                 var bookingDetail = await this._unitOfWork.BookingDetailRepository.GetByIdAsync(id);
                 if (bookingDetail == null)
                 {
@@ -49,21 +49,27 @@ namespace BadmintonReservationBusiness
                 {
                     bookingDetail.Status = updateRequest.Status.Value;
                     bookingDetail.UpdatedDate = DateTime.Now;
-                    await this._unitOfWork.BookingDetailRepository.UpdateAsync(bookingDetail);
+                    await this._unitOfWork.BeginTransactionAsync();
+                    this._unitOfWork.BookingDetailRepository.Update(bookingDetail);
+                    await _unitOfWork.CommitTransactionAsync();
 
                     var booking = await this._unitOfWork.BookingRepository.GetByIdWithDetailsAsync(id);
                     if (booking.BookingDetails.All(d => d.Status == 3))
                     {
                         booking.Status = 3; // All details cancelled, cancel the booking
                         booking.UpdatedDate = DateTime.Now;
-                        await this._unitOfWork.BookingRepository.UpdateAsync(booking);
+                        await this._unitOfWork.BeginTransactionAsync();
+                        this._unitOfWork.BookingRepository.Update(booking);
+                        await _unitOfWork.CommitTransactionAsync();
                     }
+                    //bookingDetail.Booking = booking;
                 }
 
                 return new BusinessResult(200, "Booking detail updated successfully", bookingDetail);
             }
             catch (Exception ex)
             {
+                this._unitOfWork.RollbackTransaction();
                 return new BusinessResult(500, ex.Message);
             }
         }

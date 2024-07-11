@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 namespace BadmintonReservationData
 {
@@ -21,7 +22,6 @@ namespace BadmintonReservationData
         public virtual DbSet<BookingType> BookingTypes { get; set; } = null!;
         public virtual DbSet<Company> Companies { get; set; } = null!;
         public virtual DbSet<Court> Courts { get; set; } = null!;
-        public virtual DbSet<CustomFrame> CustomFrames { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<DateType> DateTypes { get; set; } = null!;
         public virtual DbSet<Frame> Frames { get; set; } = null!;
@@ -34,9 +34,38 @@ namespace BadmintonReservationData
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=1234567890;database=NET1711_231_1_BadmintonReservation;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer(this.GetConnectionString());
             }
+        }
+
+        private string GetConnectionString()
+        {
+            IConfiguration config = new ConfigurationBuilder()
+                                        .SetBasePath(Directory.GetCurrentDirectory())
+                                        .AddJsonFile("appsettings.json", true, true).Build();
+            return config["ConnectionStrings:DefaultConnectionStringDB"];
+        }
+
+        public async Task<int> SaveChangeAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in this.ChangeTracker.Entries().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified))
+            {
+                var now = DateTime.Now;
+                entry.Property("UpdatedDate").CurrentValue = now;
+                if (entry.State == EntityState.Modified)
+                {
+                    entry.Property("CreatedDate").IsModified = false;
+                }
+
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Property("CreatedDate").CurrentValue = now;
+                }
+            }
+
+            var numberChange = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            this.ChangeTracker.Clear();
+            return numberChange;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,14 +75,6 @@ namespace BadmintonReservationData
                 entity.ToTable("booking");
 
                 entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.BookingDateFrom)
-                    .HasColumnType("datetime")
-                    .HasColumnName("booking_date_from");
-
-                entity.Property(e => e.BookingDateTo)
-                    .HasColumnType("datetime")
-                    .HasColumnName("booking_date_to");
 
                 entity.Property(e => e.BookingTypeId).HasColumnName("booking_type_id");
 
@@ -67,6 +88,8 @@ namespace BadmintonReservationData
 
                 entity.Property(e => e.PaymentType).HasColumnName("payment_type");
 
+                entity.Property(e => e.PaymentStatus).HasColumnName("payment_status");
+
                 entity.Property(e => e.PromotionAmount).HasColumnName("promotion_amount");
 
                 entity.Property(e => e.Status).HasColumnName("status");
@@ -76,19 +99,19 @@ namespace BadmintonReservationData
                     .HasColumnName("updated_date");
 
                 entity.HasOne(d => d.BookingType)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.BookingTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_booking_type_FK");
 
                 entity.HasOne(d => d.Customer)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_customer_FK");
 
                 entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.Bookings)
+                    .WithMany()
                     .HasForeignKey(d => d.PaymentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_payment_FK");
@@ -125,25 +148,23 @@ namespace BadmintonReservationData
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.TimeFrom)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_from");
 
                 entity.Property(e => e.TimeTo)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_to");
 
                 entity.Property(e => e.UpdatedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_date");
 
-                entity.HasOne(d => d.Booking)
-                    .WithMany(p => p.BookingDetails)
-                    .HasForeignKey(d => d.BookingId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("booking_detail_booking_FK");
+                //entity.HasOne(d => d.Booking)
+                //    .WithMany(p => p.BookingDetails)
+                //    .HasForeignKey(d => d.BookingId)
+                //    .OnDelete(DeleteBehavior.ClientSetNull)
+                //    .HasConstraintName("booking_detail_booking_FK");
 
                 entity.HasOne(d => d.Frame)
-                    .WithMany(p => p.BookingDetails)
+                    .WithMany()
                     .HasForeignKey(d => d.FrameId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("booking_detail_frame_FK");
@@ -208,36 +229,19 @@ namespace BadmintonReservationData
                     .HasColumnType("datetime")
                     .HasColumnName("created_date");
 
+                entity.Property(e => e.Amentities)
+                                  .HasMaxLength(512)
+                                  .HasColumnName("amentities");
+
+                entity.Property(e => e.Capacity).HasColumnName("capacity");
+
+                entity.Property(e => e.CloseHours).HasColumnName("close_hours");
+
                 entity.Property(e => e.Name)
-                    .HasMaxLength(100)
+                    .HasMaxLength(512)
                     .HasColumnName("name");
 
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.Property(e => e.UpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("updated_date");
-            });
-
-            modelBuilder.Entity<CustomFrame>(entity =>
-            {
-                entity.ToTable("custom_frame");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.FixedDateTypeId).HasColumnName("fixed_date_type_id");
-
-                entity.Property(e => e.FrameId).HasColumnName("frame_id");
-
-                entity.Property(e => e.Price).HasColumnName("price");
-
-                entity.Property(e => e.SpecificDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("specific_date");
+                entity.Property(e => e.CourtType).HasColumnName("court_type");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
@@ -245,17 +249,14 @@ namespace BadmintonReservationData
                     .HasColumnType("datetime")
                     .HasColumnName("updated_date");
 
-                entity.HasOne(d => d.FixedDateType)
-                    .WithMany(p => p.CustomFrames)
-                    .HasForeignKey(d => d.FixedDateTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("custom_frame_date_type_FK");
+                entity.Property(e => e.OpeningHours).HasColumnName("opening_hours");
 
-                entity.HasOne(d => d.Frame)
-                    .WithMany(p => p.CustomFrames)
-                    .HasForeignKey(d => d.FrameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("custom_frame_frame_FK");
+                entity.Property(e => e.SurfaceType).HasColumnName("surface_type");
+
+                entity.Property(e => e.TotalBooking)
+                    .HasMaxLength(512)
+                    .HasColumnName("total_booking");
+
             });
 
             modelBuilder.Entity<Customer>(entity =>
@@ -265,6 +266,8 @@ namespace BadmintonReservationData
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.AccountId).HasColumnName("account_id");
+                
+                entity.Property(e => e.Password).HasColumnName("password");
 
                 entity.Property(e => e.CreatedDate)
                     .HasColumnType("datetime")
@@ -322,12 +325,18 @@ namespace BadmintonReservationData
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
+                entity.Property(e => e.Label)
+                    .HasMaxLength(512)
+                    .HasColumnName("label");
+
+                entity.Property(e => e.Note)
+                    .HasMaxLength(512)
+                    .HasColumnName("note");
+
                 entity.Property(e => e.TimeFrom)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_from");
 
                 entity.Property(e => e.TimeTo)
-                    .HasColumnType("datetime")
                     .HasColumnName("time_to");
 
                 entity.Property(e => e.UpdatedDate)
@@ -335,7 +344,7 @@ namespace BadmintonReservationData
                     .HasColumnName("updated_date");
 
                 entity.HasOne(d => d.Court)
-                    .WithMany(p => p.Frames)
+                    .WithMany()
                     .HasForeignKey(d => d.CourtId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("frame_court_FK");

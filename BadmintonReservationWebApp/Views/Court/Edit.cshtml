@@ -1,0 +1,78 @@
+﻿@model BadmintonReservationData.DTO.UpdateCourtDTO
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    string ConvertToTimeString(int time)
+    {
+        int hours = time / 100;
+        int minutes = time % 100;
+        return $"{hours:D2}:{minutes:D2}";
+    }
+}
+
+
+<div class="form-group row">
+</div>
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="1">Name</label>
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @type = "text" } })
+        @Html.HiddenFor(model => model.Id)
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="1">Capacity</label>
+        @Html.EditorFor(model => model.Capacity, new { htmlAttributes = new { @class = "form-control", @type = "number" } })
+        @Html.ValidationMessageFor(model => model.Capacity, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="OpeningHours">Opening Hours</label>
+        <input type="time" id="OpeningHours" name="TimeFrom" class="form-control" value="@ConvertToTimeString(Model.OpeningHours)" />
+        @Html.ValidationMessageFor(model => model.OpeningHours, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="CloseHours">Close Hours</label>
+        <input type="time" id="CloseHours" name="TimeFrom" class="form-control" value="@ConvertToTimeString(Model.CloseHours)" />
+        @Html.ValidationMessageFor(model => model.CloseHours, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="1">Amentities</label>
+        @Html.EditorFor(model => model.Amentities, new { htmlAttributes = new { @class = "form-control", @type = "text" } })
+    </div>
+    <div class="col-md-6">
+        <label for="1">Status</label>
+        @Html.DropDownListFor(model => model.Status, new SelectList(new[]
+                 {
+        new { Value = 1, Text = "Active" },
+        new { Value = 2, Text = "Inactive" },
+        }, "Value", "Text"), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="1">Surface type</label>
+        @Html.DropDownListFor(model => model.SurfaceType, new SelectList(new[]
+                 {
+        new { Value = 1, Text = "Wooden" },
+        new { Value = 2, Text = "Synthetic" },
+        new { Value = 3, Text = "Rubberized" },
+        new { Value = 4, Text = "Concrete" },
+        new { Value = 5, Text = "Vinyl" },
+        }, "Value", "Text"), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.SurfaceType, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-md-6">
+        <label for="1">Court type</label>
+        @Html.DropDownListFor(model => model.CourtType, new SelectList(new[]
+                 {
+        new { Value = 1, Text = "Singles" },
+        new { Value = 2, Text = "Double" },
+        new { Value = 3, Text = "Both" },
+        }, "Value", "Text"), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.CourtType, "", new { @class = "text-danger" })
+    </div>
+</div>
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

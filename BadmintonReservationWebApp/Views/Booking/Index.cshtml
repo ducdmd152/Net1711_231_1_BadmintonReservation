@@ -1,0 +1,549 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+<style>
+    #topUpModal .modal-dialog {
+        max-width: 60%; /* Adjust this value as needed */
+    }
+</style>
+<div class="row">
+    <div class="col-md-10">
+        <h2 class="display-8">Booking List</h2>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+
+<form id="filterForm" class="d-flex flex-column mb-3 rounded" style="flex: 1; width: 100%; margin-right: 10px;" method="GET">
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+        <input type="text" style="flex: 1; padding: 8px;" class="search-input" id="searchInput" name="search" placeholder="Search by id, customer's name or phone number..." value="" onchange="handleInputChange()">
+        <button class="btn-primary p-2" type="submit">Search</button>
+    </div>
+    <div class="d-flex justify-content-center align-items-center mb-3 gap-3 rounded" style="width: 100%;">
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="statusFilter">Booking Status</label>
+            <select id="statusFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All</option>
+                <option value="1">Pending</option>
+                <option value="2">Successful</option>
+                <option value="3">Failed</option>
+                <option value="4">Cancelled</option>
+            </select>
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label>Booking Type</label>
+            <select id="bookingTypeFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All</option>
+                <option value="1">Normally</option>
+                <option value="5">Hourly</option>
+                <option value="2">Monthly</option>
+            </select>
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label>Payment Type</label>
+            <select id="paymentTypeFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All</option>
+                <option value="1">Offline</option>
+                <option value="2">Online</option>
+            </select>
+        </div>
+        <div class="d-flex flex-column mb-3 rounded">
+            <label>Payment Status</label>
+            <select id="paymentStatusFilter" class="form-control" onchange="handleFilterChange()">
+                <option value="0">All</option>
+                <option value="1">Not yet</option>
+                <option value="2">Paid</option>
+                <option value="3">Failed</option>
+                <option value="4">Refund</option>
+            </select>
+        </div>
+        
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="bookingDateFrom">Booking Date From</label>
+            <input type="date" id="bookingDateFrom" class="form-control" onchange="handleFilterChange()">
+        </div>
+
+        <div class="d-flex flex-column mb-3 rounded">
+            <label for="bookingDateTo">Booking Date To</label>
+            <input type="date" id="bookingDateTo" class="form-control" onchange="handleFilterChange()">
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-center align-content-center mb-3 rounded" style="width: 100%;">
+           
+    </div>
+</form>
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">Code</th>
+                    <th class="card-title text-center">Customer</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">Type</th>                            
+                    <th class="card-title text-center">Details</th>
+                    <th class="card-title text-center">Total</th>
+                    <th class="card-title text-center">Payment</th>
+                    <th class="card-title text-center">Last Updated</th>
+                    <th class="card-title text-center"></th>
+                </tr>
+            </thead>
+            <tbody class="tblList">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="topUpModal" tabindex="-1" aria-labelledby="topUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog custom-modal-width">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="topUpModalLabel">Topup Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="topUpModalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<nav id="paginationControls" aria-label="Page navigation" style="display: flex; justify-content: center; column-gap: 12px;">
+</nav>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();          
+        });
+
+        document.getElementById('filterForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Ngăn chặn việc gửi form
+        });
+
+        function handleInputChange() {
+            loadData();
+        }
+
+        function handleFilterChange() {
+            loadData();
+        }
+
+        function loadData(pageIndex = 1, pageSize = 4) {
+            var spin = document.getElementById('spinner-overlay');
+            var searchText = document.getElementById('searchInput').value;
+            var statusFilter = document.getElementById('statusFilter').value;
+            var paymentTypeFilter = document.getElementById('paymentTypeFilter').value;
+            var paymentStatusFilter = document.getElementById('paymentStatusFilter').value;
+            var bookingTypeFilter = document.getElementById('bookingTypeFilter').value;
+            var bookingDateFrom = document.getElementById('bookingDateFrom').value;
+            var bookingDateTo = document.getElementById('bookingDateTo').value;
+
+            spin.classList.remove('invisible');
+            $.ajax({
+                url: '@Url.Action("GetAll", "Booking")',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {
+                    searchText: searchText,
+                    status: statusFilter,
+                    paymentType: paymentTypeFilter,
+                    paymentStatus: paymentStatusFilter,
+                    bookingType: bookingTypeFilter,
+                    bookingDateFrom: bookingDateFrom,
+                    bookingDateTo: bookingDateTo,
+                    pageIndex: pageIndex,
+                    pageSize: pageSize
+                },
+                success: function (result) {
+                    spin.classList.add('invisible');
+                    const statusMap = {
+                        1: 'Pending',
+                        2: 'Successful',
+                        3: 'Failed',
+                        4: 'Cancelled'
+                    };
+                    const paymentTypeMap = {
+                        1: 'Offline',
+                        2: 'Online',
+                    };
+                    const paymentStatusMap = {
+                        1: 'Not yet',
+                        2: 'Paid',
+                        3: 'Fail',
+                        4: 'Refund'
+                    };
+                    const bookingTypeMap = {
+                        1: 'Normally',
+                        2: 'Monthly',
+                        5: 'Hourly'
+                    };
+                    var html = '';
+                    $.each(result.list, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.id + '</td>';
+                        html += '<td>' + item.customer.fullName + '<br/>' + item.customer.phoneNumber + '</td>';
+                        html += '<td>' + statusMap[item.status] + '</td>';
+                        html += '<td>' + bookingTypeMap[item.bookingTypeId] + '</td>';
+                        html += '<td>' + generateBookingDetailsHTML(item.bookingDetails) + '</td>';
+                        html += '<td>' +
+                            Math.max(
+                                item.bookingDetails.reduce((acc, d) => acc + d.price, 0) - item.promotionAmount,
+                                0
+                            ).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) +
+                            '</td>';
+                        html += '<td>' + paymentTypeMap[item.paymentType] + ' | ' + paymentStatusMap[item.paymentStatus] + '</td>';
+                        html += '<td>' + formatDateTime(item.updatedDate) + '</td>';
+                        html += '<td><button type="button" class="btn btn-outline-primary" onclick="return edit(\'' + item.id + '\')">Edit</button> | <button type="button" class="btn btn-outline-info" onclick="redirectToReport(\'' + item.id + '\')">Report</button> | <button type="button" class="btn btn-outline-danger" onclick="return deleteItem(\'' + item.id + '\')">Delete</button></td>';
+                        html += '</tr>';
+                    });
+                    $('.tblList').html(html);
+
+                    // Generate pagination controls
+                    generatePagination(result.pageIndex, result.totalOfPages);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                    alert(`Something went wrong!`);
+                    spin.classList.add('invisible');
+                }
+            });
+        }
+
+        function generatePagination(currentPage, totalPages) {
+            var paginationHtml = '';
+
+            if (currentPage > 1) {
+                paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + (currentPage - 1) + ')">Prev</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Prev</button>';
+            }
+
+            for (var i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<button class="btn btn-info">' + i + '</button>';
+                } else {
+                    paginationHtml += '<button class="btn btn-outline-secondary" onclick="loadData(' + i + ')">' + i + '</button>';
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHtml += '<button class="btn btn-outline-secondary"  onclick="loadData(' + (currentPage + 1) + ')">Next</button>';
+            }
+            else {
+                paginationHtml += '<button class="btn btn-outline-secondary" disabled>Next</button>';
+            }
+
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function add() {
+            $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html("Add New Booking");
+            $('#topUpModal').on('hidden.bs.modal', function (e) {
+                frameList = [];
+                bookingDetailIndex = 0;
+            });
+
+            $.ajax({
+                url: '@Url.Action("Add", "Booking")',
+                type: "GET",
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+                    addBookingDetail();
+                    $("#btSave").off("click").on("click", function () {
+                        create();
+                    });
+                },
+                error: function (message) {
+                    alert(message);
+                }
+            });
+        }
+
+        var bookingDetailIndex = 0;
+
+        function addBookingDetail() {
+            var today = new Date().toISOString().split('T')[0];
+            var newDetail = `
+                <div class="booking-detail" data-index="${bookingDetailIndex}">
+                     <h5>Booking Detail #${bookingDetailIndex + 1}</h5>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__BookDate">Book Date</label>
+                            <input type="date" class="form-control" name="BookingDetails[${bookingDetailIndex}].BookDate" onchange="loadFrames(this)" value="${today}/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__FrameId">Frame</label>
+                                    <select class="form-control frame-dropdown" name="BookingDetails[${bookingDetailIndex}].FrameId" onchange="loadPrice(this)" data_index="${bookingDetailIndex}">
+                                <!-- Frames will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="BookingDetails_${bookingDetailIndex}__Price">Price</label>
+                            <input type="number" class="form-control" name="BookingDetails[${bookingDetailIndex}].Price" step="1000" min="0" />
+                        </div>
+                    </div>
+                    <hr class="m-2"/>
+                </div>`;
+            $('#bookingDetailsContainer').append(newDetail);
+            $(`input[name="BookingDetails[${bookingDetailIndex}].BookDate"]`).val(today);
+            loadFrames($(`input[name="BookingDetails[${bookingDetailIndex}].BookDate"]`));
+            bookingDetailIndex++;
+        }
+
+        var frameList = [];
+        function loadFrames(input) {
+            var bookingDate = $(input).val();
+            var index = $(input).closest('.booking-detail').attr('data-index');
+            var frameDropdown = $('select[name="BookingDetails[' + index + '].FrameId"]');
+
+            $.ajax({
+                url: '@Url.Action("GetFrameAvailable", "Booking")',
+                type: 'GET',
+                data: { bookingDate: bookingDate },
+                success: function (frames) {
+                    frameList[index] = frames;
+                    frameDropdown.empty();
+                    $.each(frames, function (i, frame) {
+                        let timeFrom = convertIntTime(frame.timeFrom); 
+                        let timeTo = convertIntTime(frame.timeTo);
+                        frameDropdown.append($('<option>', {
+                            value: frame.id,
+                            text: `${frame.court.name} - ${timeFrom} - ${timeTo}`
+                        }));
+                    });
+                    frameDropdown.trigger('change');
+                },
+                error: function (error) {
+                    console.error('Error fetching frames:', error);
+                }
+            });
+        }
+
+
+        function loadPrice(frameDropdown) {
+            var frameId = $(frameDropdown).val();
+            var index = $(frameDropdown).attr('data_index');
+
+            // Find the frame with the selected ID from the global frameList
+            var selectedFrame = frameList[index].find(frame => frame.id == frameId);
+
+            // Check if a valid frame was found and then update the price
+            if (selectedFrame) {
+                $('input[name="BookingDetails[' + index + '].Price"]').val(selectedFrame.price);
+            }
+        }
+
+        function edit(id) {
+            $("#topUpModalContent").html("");
+            $("#topUpModalLabel").html(`Edit booking [${id}]`);
+            $.ajax({
+                url: '@Url.Action("Edit", "Booking")' + '/' + id,
+                type: "GET",
+                success: function (result) {
+                    $("#topUpModalContent").html(result);
+                    $('#topUpModal').modal('show');
+
+                    $("#btSave").off("click").on("click", function () {
+                        update(id);
+                    });
+                },
+                error: function (message) {
+                    alert(message);
+                }
+            });
+        }
+
+        function deleteItem(id) {
+            var result = confirm(`Are you sure to delete booking [${id}]?`);
+            if (result) {
+
+                $.ajax({
+                    url: '@Url.Action("Delete", "Booking")' + '/' + id,
+                    type: 'DELETE',
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json",
+                    success: function (result) {
+                        loadData();
+                        alert(`Deleted booking [${id}] sucessfully!`);
+                    },
+                    error: function (xhr, error) {
+                        console.log(xhr);
+                        alert(`Something went wrong!`);
+                    }
+                });
+            }
+        }
+
+        function generateBookingDetailsHTML(bookingDetails) {
+            var html = '';
+
+            bookingDetails.forEach(function (bookingDetail) {
+                var bookDate = new Date(bookingDetail.bookDate).toLocaleDateString();
+                var timeFrom = convertIntTime(bookingDetail.timeFrom);
+                var timeTo = convertIntTime(bookingDetail.timeTo);
+                var courtName = bookingDetail.frame.court.name;
+
+                var rowHtml = '<p>';
+                rowHtml += bookDate + ' | ' + timeFrom + ' - ' + timeTo + ' | ' + courtName;
+                rowHtml += '</p>';
+                html += rowHtml;
+            });
+
+            return html;
+        }
+
+        function formatDateTime(dateTimeString, format) {
+            var dateTime = new Date(dateTimeString);
+                var formattedDateTime = dateTime.toLocaleString(undefined, { timeZone: 'Asia/Bangkok', ...format });
+
+            return formattedDateTime;
+        }
+
+        function convertToISODateTime(dateTimeString) {
+            // Create a new Date object from the date-time string
+            const date = new Date(dateTimeString);
+
+            // Get the components of the date and time
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+
+            // Construct the ISO 8601 date-time string
+            const isoDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+            return isoDateTime;
+        }
+
+        function convertIntTime(hhmm) {
+            // Pad the number to ensure it is 4 digits
+            let timeString = hhmm.toString().padStart(4, '0');
+
+            // Extract hours and minutes
+            let hours = timeString.slice(0, 2);
+            let minutes = timeString.slice(2);
+
+            // Combine them in hh:mm format
+            return `${hours}:${minutes}`;
+        }
+
+
+        function create() {
+            var bookingData = {
+                CustomerId: $('#CustomerId').val(),
+                BookingTypeId: $('#BookingTypeId').val(),
+                Status: $('#Status').val(),
+                PaymentType: $('#PaymentType').val(),
+                PaymentStatus: $('#PaymentStatus').val(),
+                PromotionAmount: $('#PromotionAmount').val(),                               
+                BookingDetails: []
+            };
+
+            $('.booking-detail').each(function (index, element) {
+                var frameId = $(element).find('[name^="BookingDetails"]').filter('[name$="FrameId"]').val();
+                var selectedFrame = frameList[index].find(frame => frame.id == frameId);
+                                
+                var detail = {
+                    Id: 0,
+                    BookDate: $(element).find('[name^="BookingDetails"]').filter('[name$="BookDate"]').val(),
+                    FrameId: frameId,
+                    TimeFrom: selectedFrame.timeFrom,
+                    TimeTo: selectedFrame.timeTo,
+                    Price: $(element).find('[name^="BookingDetails"]').filter('[name$="Price"]').val()
+                };
+                bookingData.BookingDetails.push(detail);
+            });
+
+            console.log(bookingData);
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Create", "Booking")',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(bookingData),
+                success: function (result) {
+                    $('#topUpModal').modal('hide');
+                    loadData();
+                    alert("Created new booking sucessfully!");
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                    alert(`Something went wrong!`);
+                }
+            });
+        }
+
+        function update(id) {
+            var bookingData = {
+                CustomerId: $('#CustomerId').val(),
+                BookingTypeId: $('#BookingTypeId').val(),
+                Status: $('#Status').val(),
+                PaymentType: $('#PaymentType').val(),
+                PaymentStatus: $('#PaymentStatus').val(),
+                PromotionAmount: $('#PromotionAmount').val(),
+                BookingDetails: []
+            };
+
+            $('.booking-detail').each(function (index, element) {
+                var detail = {
+                    Id: $(`#BookingDetails_${index}__Id`).val(),
+                    BookDate: $(`#BookingDetails_${index}__BookDate`).val(),
+                    FrameId: $(`#BookingDetails_${index}__FrameId`).val(),
+                    TimeFrom: $(`#BookingDetails_${index}__TimeFrom`).val(),
+                    TimeTo: $(`#BookingDetails_${index}__TimeTo`).val(),
+                    Price: $(`#BookingDetails_${index}__Price`).val(),
+                };
+                console.log(detail.Price);
+                bookingData.BookingDetails.push(detail);
+            });
+
+            $.ajax({
+                type: 'PUT',
+                url: '@Url.Action("Update", "Booking")' + '/' + id,
+                contentType: 'application/json;charset=utf-8',
+                dataType: "json",
+                data: JSON.stringify(bookingData),
+                success: function (result) {
+                    $('#topUpModal').modal('hide');
+                    loadData();
+                    alert(`Updated booking id:${id} successfully!`);
+                },
+                error: function (xhr, error) {
+                    console.log(xhr);
+                    alert(`Something went wrong!`);
+                }
+            });
+        }
+
+        function redirectToReport(id) {
+            var url = '/Booking/report/' + id;
+            window.location.href = url;
+        }
+    
+
+    </script>
+}

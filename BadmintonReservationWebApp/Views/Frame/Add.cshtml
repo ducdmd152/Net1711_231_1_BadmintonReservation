@@ -1,0 +1,94 @@
+@model BadmintonReservationData.DTOs.CreateFrameRequestDTO
+@{
+    string ConvertToTimeString(int time)
+    {
+        int hours = time / 100;
+        int minutes = time % 100;
+        return $"{hours:D2}:{minutes:D2}";
+    }
+}
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="Label">Label</label>
+        @Html.EditorFor(model => model.Label, new { htmlAttributes = new { @class = "form-control", type= "text"} })
+        @Html.ValidationMessageFor(model => model.Label, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="Note">Note</label>
+        @Html.EditorFor(model => model.Note, new { htmlAttributes = new { @class = "form-control", type= "text"} })
+        @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="TimeFrom">Time From</label>
+        <input type="time" id="TimeFrom" name="TimeFrom" class="form-control" value="@ConvertToTimeString(Model.TimeFrom)" />
+        @Html.ValidationMessageFor(model => model.TimeFrom, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="TimeTo">Time To</label>
+        <input type="time" id="TimeTo" name="TimeTo" class="form-control" value="@ConvertToTimeString(Model.TimeTo)" />
+        @Html.ValidationMessageFor(model => model.TimeTo, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="1">Price</label>
+        @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", @min = "0" } })
+        @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        <label for="1">Status</label>
+        @Html.DropDownListFor(model => model.Status, new SelectList(new[]
+        {
+            new { Value = 1, Text = "Active" },
+            new { Value = 2, Text = "Inactive" },
+        }, "Value", "Text"), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="1">Court</label>
+        <select id="CourtId" class="form-control"></select>
+        @Html.ValidationMessageFor(model => model.CourtId, "", new { @class = "text-danger" })
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        getAllCourt();
+    });
+    function getAllCourt() {
+        $.ajax({
+            url: '@Url.Action("GetAll", "Court")',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {
+                    pageIndex: 1,
+                    pageSize: 1000
+                },
+                success: function (result) {
+                    // Clear previous options
+                    $('#CourtId').empty();
+                    // Add each court as an option to the dropdown list
+                    $.each(result.list, function(key, item) {
+                        $('#CourtId').append($('<option>', {
+                            value: item.id,
+                            text: item.name + ' | ' + item.amentities
+                        }));
+                    });
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                    alert(`Something went wrong!`);
+                }
+        });
+    }
+
+
+
+</script>
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
